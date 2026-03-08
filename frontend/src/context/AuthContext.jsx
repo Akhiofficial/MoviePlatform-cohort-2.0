@@ -7,7 +7,7 @@ const AuthContext = createContext();
 
 // Configure default axios for our backend
 export const api = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:3000/api' : '/api',
     withCredentials: true, // Needed to attach cookies
 });
 
