@@ -1,8 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clapperboard, User, Mail, Lock, ArrowRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
+    const [fullname, setFullname] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [agreed, setAgreed] = useState(false);
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const { register } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (!fullname || !email || !password) {
+            setError('Please fill in all fields.');
+            return;
+        }
+
+        if (!agreed) {
+            setError('You must agree to the Terms of Service and Privacy Policy.');
+            return;
+        }
+
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters long.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            await register(fullname, email, password);
+            navigate('/'); // Navigate to home on success
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to create account. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="relative min-h-screen bg-bg-dark flex flex-col items-center justify-center overflow-hidden text-white font-sans selection:bg-brand-red selection:text-white">
 
@@ -48,7 +89,13 @@ const Signup = () => {
 
                     {/* Bottom Dark Section (Form) */}
                     <div className="bg-[#1A1616] p-8">
-                        <form className="flex flex-col gap-5 w-full" onSubmit={(e) => e.preventDefault()}>
+                        <form className="flex flex-col gap-5 w-full" onSubmit={handleSubmit}>
+
+                            {error && (
+                                <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-md text-sm">
+                                    {error}
+                                </div>
+                            )}
 
                             {/* Full Name Input */}
                             <div className="flex flex-col gap-2">
@@ -59,6 +106,8 @@ const Signup = () => {
                                     </div>
                                     <input
                                         type="text"
+                                        value={fullname}
+                                        onChange={(e) => setFullname(e.target.value)}
                                         placeholder="John Doe"
                                         className="w-full bg-[#241E1E] border border-white/5 rounded-xl pl-12 pr-5 py-4 text-white placeholder-gray-600 focus:outline-[1.5px] focus:outline-brand-red transition-all"
                                     />
@@ -74,6 +123,8 @@ const Signup = () => {
                                     </div>
                                     <input
                                         type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
                                         placeholder="email@example.com"
                                         className="w-full bg-[#241E1E] border border-white/5 rounded-xl pl-12 pr-5 py-4 text-white placeholder-gray-600 focus:outline-[1.5px] focus:outline-brand-red transition-all"
                                     />
@@ -89,6 +140,8 @@ const Signup = () => {
                                     </div>
                                     <input
                                         type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
                                         placeholder="••••••••"
                                         className="w-full bg-[#241E1E] border border-white/5 rounded-xl pl-12 pr-5 py-4 text-white placeholder-gray-600 focus:outline-[1.5px] focus:outline-brand-red transition-all tracking-widest text-lg h-[54px]"
                                     />
@@ -100,7 +153,12 @@ const Signup = () => {
                             <div className="mt-2 mb-2">
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <div className="relative shrink-0 flex items-center justify-center">
-                                        <input type="checkbox" className="appearance-none w-5 h-5 border-[1.5px] border-gray-600 rounded-full bg-transparent checked:bg-brand-red checked:border-brand-red cursor-pointer transition-colors" />
+                                        <input
+                                            type="checkbox"
+                                            checked={agreed}
+                                            onChange={(e) => setAgreed(e.target.checked)}
+                                            className="appearance-none w-5 h-5 border-[1.5px] border-gray-600 rounded-full bg-transparent checked:bg-brand-red checked:border-brand-red cursor-pointer transition-colors"
+                                        />
                                         <span className="absolute w-2.5 h-2.5 bg-white rounded-full pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity"></span>
                                     </div>
                                     <span className="text-[13px] text-gray-400 font-medium">
@@ -110,8 +168,12 @@ const Signup = () => {
                             </div>
 
                             {/* Submit Button */}
-                            <button className="flex items-center justify-center gap-2 w-full bg-brand-red hover:bg-[#F40612] text-white font-bold py-4 rounded-xl transition-all shadow-[0_4px_20px_0_rgba(229,9,20,0.4)] hover:shadow-[0_4px_25px_0_rgba(229,9,20,0.6)] mt-2">
-                                <span className="text-[17px]">Create Account</span>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="flex items-center justify-center gap-2 w-full bg-brand-red hover:bg-[#F40612] text-white font-bold py-4 rounded-xl transition-all shadow-[0_4px_20px_0_rgba(229,9,20,0.4)] hover:shadow-[0_4px_25px_0_rgba(229,9,20,0.6)] mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-[17px]">{loading ? 'Creating Account...' : 'Create Account'}</span>
                                 <ArrowRight className="w-5 h-5" />
                             </button>
 

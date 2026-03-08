@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Clapperboard } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Login = () => {
     // Background images for the mosaic
@@ -17,7 +18,40 @@ const Login = () => {
         'https://images.unsplash.com/photo-1582234372722-50d7ccc30ebd?q=80&w=2070&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072&auto=format&fit=crop',
         'https://images.unsplash.com/photo-1485001564903-56e6a54d46ce?q=80&w=2070&auto=format&fit=crop',
+        'https://images.unsplash.com/photo-1485001564903-56e6a54d46ce?q=80&w=2070&auto=format&fit=crop',
     ];
+
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const { login } = useAuth();
+    const navigate = useNavigate();
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+
+        if (!email || !password) {
+            setError('Please enter both email and password.');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            const res = await login(email, password);
+            if (res.user?.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
+        } catch (err) {
+            setError(err.response?.data?.message || 'Failed to login. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="relative min-h-screen bg-bg-dark flex flex-col justify-between overflow-hidden text-white font-sans selection:bg-brand-red selection:text-white">
@@ -56,13 +90,21 @@ const Login = () => {
 
                     <h1 className="text-3xl font-bold mb-8">Sign In</h1>
 
-                    <form className="flex flex-col gap-6 w-full" onSubmit={(e) => e.preventDefault()}>
+                    <form className="flex flex-col gap-6 w-full" onSubmit={handleSubmit}>
+
+                        {error && (
+                            <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-md text-sm">
+                                {error}
+                            </div>
+                        )}
 
                         {/* Email Input */}
                         <div className="flex flex-col gap-2 relative group">
-                            <label className="text-[13px] font-bold text-gray-200 ml-1 group-focus-within:text-brand-red transition-colors">Email or mobile number</label>
+                            <label className="text-[13px] font-bold text-gray-200 ml-1 group-focus-within:text-brand-red transition-colors">Email</label>
                             <input
-                                type="text"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email address"
                                 className="w-full bg-[#2B2323] border border-transparent rounded-[12px] px-5 py-4 text-white placeholder-gray-500 focus:outline-[1.5px] focus:outline-brand-red transition-all shadow-inner"
                             />
@@ -73,14 +115,20 @@ const Login = () => {
                             <label className="text-[13px] font-bold text-gray-200 ml-1 group-focus-within:text-brand-red transition-colors">Password</label>
                             <input
                                 type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Password"
                                 className="w-full bg-[#2B2323] border border-transparent rounded-[12px] px-5 py-4 text-white placeholder-gray-500 focus:outline-[1.5px] focus:outline-brand-red transition-all shadow-inner"
                             />
                         </div>
 
                         {/* Sign In Button */}
-                        <button className="w-full bg-brand-red hover:bg-[#F40612] focus:bg-[#B8060E] focus:outline-hidden text-white font-bold py-4 rounded-[12px] transition-colors mt-4 text-[17px] shadow-[0_4px_14px_0_rgba(229,9,20,0.39)]">
-                            Sign In
+                        <button
+                            disabled={loading}
+                            type="submit"
+                            className="w-full bg-brand-red hover:bg-[#F40612] focus:bg-[#B8060E] focus:outline-hidden text-white font-bold py-4 rounded-[12px] transition-colors mt-4 text-[17px] shadow-[0_4px_14px_0_rgba(229,9,20,0.39)] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? 'Signing In...' : 'Sign In'}
                         </button>
 
                         {/* Helpers */}

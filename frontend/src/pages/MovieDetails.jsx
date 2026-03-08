@@ -4,11 +4,13 @@ import MovieCard from '../components/MovieCard';
 import { HeroSkeleton } from '../components/Loader';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getSimilarMovies } from '../services/tmdb';
-import { useFavorites } from '../context/FavoritesContext';
+import { useUserActivity } from '../context/UserActivityContext';
+import { useAuth } from '../context/AuthContext';
 
 const MovieDetails = () => {
   const { id } = useParams();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, addToHistory } = useUserActivity();
+  const { user } = useAuth();
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [movie, setMovie] = useState(null);
   const [similarMovies, setSimilarMovies] = useState([]);
@@ -164,14 +166,22 @@ const MovieDetails = () => {
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <button
-                onClick={() => movie.trailerKey && setIsVideoPlaying(true)}
+                onClick={() => {
+                  if (movie.trailerKey) {
+                    setIsVideoPlaying(true);
+                    addToHistory(movie);
+                  }
+                }}
                 className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-xl w-full sm:w-auto ${movie.trailerKey ? 'bg-brand-red hover:bg-[#F40612] text-white shadow-brand-red/20 cursor-pointer' : 'bg-gray-600 text-gray-300 cursor-not-allowed'}`}
               >
                 <Play className="w-5 h-5 fill-current" />
                 Watch Trailer
               </button>
               <button
-                onClick={() => toggleFavorite(movie)}
+                onClick={() => {
+                  if (!user) return;
+                  toggleFavorite(movie)
+                }}
                 className={`flex items-center justify-center gap-2 border border-white/10 backdrop-blur-md px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 w-full sm:w-auto cursor-pointer ${isFav ? 'bg-brand-red/20 text-brand-red hover:bg-brand-red/30 border-brand-red/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
               >
                 <Heart className={`w-5 h-5 ${isFav ? 'fill-brand-red' : ''}`} />
@@ -243,7 +253,10 @@ const MovieDetails = () => {
             <h3 className="text-2xl font-bold">Video Spotlight</h3>
             <div className="relative w-full aspect-video rounded-[24px] overflow-hidden group border border-white/10 shadow-2xl bg-black">
               {!isVideoPlaying ? (
-                <div className="w-full h-full cursor-pointer" onClick={() => setIsVideoPlaying(true)}>
+                <div className="w-full h-full cursor-pointer" onClick={() => {
+                  setIsVideoPlaying(true);
+                  addToHistory(movie);
+                }}>
                   <img src={movie.trailerPreview} alt="Trailer preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="w-20 h-20 bg-brand-red rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(229,9,20,0.6)]">

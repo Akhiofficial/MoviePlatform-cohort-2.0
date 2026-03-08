@@ -1,16 +1,22 @@
 import React from 'react';
 import { Heart, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useFavorites } from '../context/FavoritesContext';
+import { useUserActivity } from '../context/UserActivityContext';
+import { useAuth } from '../context/AuthContext';
 
 const MovieCard = ({ movie }) => {
-    const { isFavorite, toggleFavorite } = useFavorites();
+    const { isFavorite, toggleFavorite } = useUserActivity();
+    const { user } = useAuth();
     const isFav = isFavorite(movie.id);
     const navigate = useNavigate();
 
     const handleFavoriteClick = (e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (!user) {
+            navigate('/login');
+            return;
+        }
         toggleFavorite(movie);
     };
 

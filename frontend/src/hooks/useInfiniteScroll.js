@@ -4,6 +4,7 @@ const useInfiniteScroll = (callback, hasMore) => {
     const observerRef = useRef();
 
     useEffect(() => {
+        const currentObserverRef = observerRef.current;
         const observer = new IntersectionObserver(
             (entries) => {
                 if (entries[0].isIntersecting && hasMore) {
@@ -13,13 +14,13 @@ const useInfiniteScroll = (callback, hasMore) => {
             { threshold: 1.0 }
         );
 
-        if (observerRef.current) {
-            observer.observe(observerRef.current);
+        if (currentObserverRef) {
+            observer.observe(currentObserverRef);
         }
 
         return () => {
-            if (observerRef.current) {
-                observer.unobserve(observerRef.current);
+            if (currentObserverRef) {
+                observer.unobserve(currentObserverRef);
             }
         };
     }, [callback, hasMore]);

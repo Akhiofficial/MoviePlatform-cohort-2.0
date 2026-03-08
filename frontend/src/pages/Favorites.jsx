@@ -1,6 +1,6 @@
 import React from 'react';
 import { Play, Filter, Plus, Star } from 'lucide-react';
-import { useFavorites } from '../context/FavoritesContext';
+import { useUserActivity } from '../context/UserActivityContext';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ const FavoriteCard = ({ movie }) => {
 
   return (
     <div
-      onClick={() => navigate(`/movie/${movie.id}`)}
+      onClick={() => navigate(`/movie/${movie.movieId}`)}
       className="flex flex-col gap-2 group cursor-pointer w-full"
     >
       {/* Poster Image Container */}
@@ -52,7 +52,7 @@ const AddNewCard = () => (
 );
 
 const Favorites = () => {
-  const { favorites } = useFavorites();
+  const { favorites } = useUserActivity();
 
   return (
     <div className="min-h-screen bg-[#141010] text-white pt-32 pb-24">
@@ -88,7 +88,7 @@ const Favorites = () => {
         {/* Favorites Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 mb-20">
           {favorites.map((movie) => (
-            <FavoriteCard key={movie.id} movie={movie} />
+            <FavoriteCard key={movie.movieId} movie={movie} />
           ))}
           {/* Static Add New Card at the end */}
           <AddNewCard />

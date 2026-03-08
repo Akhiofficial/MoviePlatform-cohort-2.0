@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Clapperboard, Search } from 'lucide-react';
+import { Clapperboard, Search, LogOut, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
+    const { user, logout } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,6 +24,11 @@ const Navbar = () => {
         }
     };
 
+    const handleLogout = async () => {
+        await logout();
+        navigate('/');
+    };
+
     return (
         <nav className={`fixed top-0 w-full z-50 transition-colors duration-300 ${isScrolled ? 'bg-bg-dark/95 backdrop-blur-md shadow-md' : 'bg-linear-to-b from-black/80 to-transparent'}`}>
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
@@ -36,7 +43,9 @@ const Navbar = () => {
                         <Link to="/" className="text-white hover:text-brand-red transition-colors">Home</Link>
                         <Link to="/movies" className="hover:text-white transition-colors">Movies</Link>
                         <Link to="/tv" className="hover:text-white transition-colors">TV Shows</Link>
-                        <Link to="/favorites" className="hover:text-white transition-colors">My List</Link>
+                        {user && (
+                            <Link to="/favorites" className="hover:text-white transition-colors">My List</Link>
+                        )}
                     </div>
                 </div>
 
@@ -54,10 +63,28 @@ const Navbar = () => {
                     </form>
 
                     <div className="flex items-center gap-4 text-sm font-medium">
-                        <Link to="/login" className="text-white hover:text-gray-300 transition-colors hidden sm:block">Login</Link>
-                        <Link to="/signup" className="bg-brand-red hover:bg-red-700 text-white px-6 py-2 rounded-full transition-colors font-semibold">
-                            Sign Up
-                        </Link>
+                        {user ? (
+                            <div className="flex items-center gap-4">
+                                <div className="hidden sm:flex items-center gap-2 text-gray-300">
+                                    <User className="w-4 h-4" />
+                                    <span>{user.fullname || user.name || 'User'}</span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors border border-white/10"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Logout</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <Link to="/login" className="text-white hover:text-gray-300 transition-colors hidden sm:block">Login</Link>
+                                <Link to="/signup" className="bg-brand-red hover:bg-red-700 text-white px-6 py-2 rounded-full transition-colors font-semibold">
+                                    Sign Up
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

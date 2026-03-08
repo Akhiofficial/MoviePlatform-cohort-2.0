@@ -43,7 +43,8 @@ async function registerUser(req, res) {
         user: {
             id: user._id,
             fullname: user.fullname,
-            email: user.email
+            email: user.email,
+            role: user.role
         }
     })
 }
@@ -85,7 +86,8 @@ async function loginUser(req, res) {
         user: {
             id: user._id,
             fullname: user.fullname,
-            email: user.email
+            email: user.email,
+            role: user.role
         }
     })
 }
@@ -115,7 +117,12 @@ async function getMe(req, res) {
 
     res.status(200).json({
         message: "User fetched successfully",
-        user
+        user: {
+            id: user._id,
+            fullname: user.fullname,
+            email: user.email,
+            role: user.role
+        }
     })
 }
 

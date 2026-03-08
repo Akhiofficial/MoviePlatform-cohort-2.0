@@ -35,7 +35,7 @@ const Footer = () => {
                         <h4 className="text-white font-bold text-base">Browse</h4>
                         <ul className="space-y-4 text-gray-400 font-medium">
                             <li><Link to="/movies" className="hover:text-white transition-colors">Movies</Link></li>
-                            <li><Link to="/tv-shows" className="hover:text-white transition-colors">TV Shows</Link></li>
+                            <li><Link to="/tv" className="hover:text-white transition-colors">TV Shows</Link></li>
                             <li><Link to="/live" className="hover:text-white transition-colors">Live TV</Link></li>
                             <li><Link to="/awards" className="hover:text-white transition-colors">Award Winners</Link></li>
                         </ul>

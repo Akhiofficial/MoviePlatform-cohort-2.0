@@ -3,17 +3,24 @@ import { Search as SearchIcon, X, Star, User, Heart } from 'lucide-react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { searchMovies } from '../services/tmdb';
 import { GridCardSkeleton } from '../components/Loader';
-import { useFavorites } from '../context/FavoritesContext';
+import { useUserActivity } from '../context/UserActivityContext';
+import { useAuth } from '../context/AuthContext';
 
 const SearchResultCard = ({ item }) => {
   const isPerson = item.media_type === 'person';
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite } = useUserActivity();
+  const { user } = useAuth();
   const isFav = !isPerson ? isFavorite(item.id) : false;
   const navigate = useNavigate();
 
   const handleFavoriteClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!user) {
+      navigate('/login');
+      return;
+    }
 
     // Create consistent movie object for context
     const favoriteItem = {
