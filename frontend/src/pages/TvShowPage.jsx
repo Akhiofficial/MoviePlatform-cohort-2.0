@@ -198,7 +198,7 @@ const TvShowPage = () => {
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={() => handleGenreSelect('')}
-                        className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === ''
+                        className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === ''
                             ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
                             : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
                             }`}
@@ -214,7 +214,7 @@ const TvShowPage = () => {
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => handleGenreSelect(genre.id)}
-                            className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id
+                            className={`px-4 md:px-6 py-2 md:py-2.5 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id
                                 ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
                                 : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#222] hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
                                 }`}

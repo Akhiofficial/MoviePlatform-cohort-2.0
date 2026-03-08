@@ -177,7 +177,7 @@ const DashboardOverview = () => {
     })();
 
     return (
-        <div className="px-10 pb-12 w-full mx-auto space-y-6">
+        <div className="px-4 md:px-10 pb-12 w-full mx-auto space-y-6">
 
             {/* ── KPI Cards ── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -307,13 +307,13 @@ const DashboardOverview = () => {
             </div>
 
             {/* ── Latest Movies Added ── */}
-            <div className="bg-[#241717] border border-[#302020]/50 rounded-[24px] p-7 shadow-sm hover:border-[#402A2A] transition-colors">
-                <div className="flex justify-between items-center mb-8">
+            <div className="bg-[#241717] border border-[#302020]/50 rounded-[24px] p-5 md:p-7 shadow-sm hover:border-[#402A2A] transition-colors overflow-hidden">
+                <div className="flex justify-between items-center mb-6 md:mb-8">
                     <div>
-                        <h2 className="text-[17px] font-bold text-white tracking-tight">
+                        <h2 className="text-[15px] md:text-[17px] font-bold text-white tracking-tight">
                             Latest Movies Added
                         </h2>
-                        <p className="text-gray-500 text-[12px] font-medium mt-0.5">
+                        <p className="text-gray-500 text-[11px] md:text-[12px] font-medium mt-0.5">
                             {movies.length} total · showing {moviePage * moviesPerPage + 1}–{Math.min((moviePage + 1) * moviesPerPage, movies.length)}
                         </p>
                     </div>
@@ -321,28 +321,28 @@ const DashboardOverview = () => {
                         <button
                             onClick={() => setMoviePage((p) => Math.max(p - 1, 0))}
                             disabled={moviePage === 0}
-                            className="w-[30px] h-[30px] rounded-[10px] bg-[#1A1111] border border-[#302020] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#302020] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="w-[26px] h-[26px] md:w-[30px] md:h-[30px] rounded-[8px] md:rounded-[10px] bg-[#1A1111] border border-[#302020] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#302020] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                             <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                             onClick={() => setMoviePage((p) => Math.min(p + 1, totalPages - 1))}
                             disabled={moviePage >= totalPages - 1}
-                            className="w-[30px] h-[30px] rounded-[10px] bg-[#1A1111] border border-[#302020] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#302020] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                            className="w-[26px] h-[26px] md:w-[30px] md:h-[30px] rounded-[8px] md:rounded-[10px] bg-[#1A1111] border border-[#302020] flex items-center justify-center text-gray-400 hover:text-white hover:bg-[#302020] disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
                         >
                             <ChevronRight className="w-4 h-4" />
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5">
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-5">
                     {visibleMovies.length > 0 ? visibleMovies.map((movie) => (
                         <div
                             key={movie._id}
                             className="group cursor-pointer"
                             onClick={() => navigate('/admin/movies')}
                         >
-                            <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow bg-[#222]">
+                            <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-2 md:mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow bg-[#222]">
                                 {movie.poster ? (
                                     <img
                                         src={movie.poster}
@@ -355,10 +355,10 @@ const DashboardOverview = () => {
                                     </div>
                                 )}
                             </div>
-                            <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">
+                            <h4 className="text-[12px] md:text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">
                                 {movie.title}
                             </h4>
-                            <p className="text-[11px] font-medium text-gray-500">
+                            <p className="text-[10px] md:text-[11px] font-medium text-gray-500 truncate">
                                 {movie.genre || 'Movie'} · {movie.releaseDate ? new Date(movie.releaseDate).getFullYear() : 'N/A'}
                             </p>
                         </div>

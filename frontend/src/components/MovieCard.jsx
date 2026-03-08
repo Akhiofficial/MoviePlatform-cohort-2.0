@@ -41,7 +41,7 @@ const MovieCard = ({ movie }) => {
                 animate={{ opacity: 1, y: 0 }}
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.3 }}
-                className="flex flex-col gap-3 group w-[220px] min-w-[220px] sm:w-[260px] sm:min-w-[260px] cursor-pointer"
+                className="flex flex-col gap-3 group w-[160px] min-w-[160px] sm:w-[200px] sm:min-w-[200px] md:w-[260px] md:min-w-[260px] cursor-pointer"
             >
                 {/* Poster Image Container */}
                 <div className="relative aspect-2/3 w-full rounded-2xl overflow-hidden shadow-lg border border-white/5 transition-all duration-300 group-hover:shadow-2xl group-hover:border-white/20">
@@ -86,8 +86,8 @@ const MovieCard = ({ movie }) => {
 
                 {/* Details */}
                 <div className="flex flex-col gap-1 px-1">
-                    <h3 className="text-gray-900 dark:text-white font-bold text-lg truncate group-hover:text-brand-red transition-colors">{movie?.title || "Movie Title"}</h3>
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">
+                    <h3 className="text-gray-900 dark:text-white font-bold text-base md:text-lg truncate group-hover:text-brand-red transition-colors">{movie?.title || "Movie Title"}</h3>
+                    <div className="flex items-center justify-between text-xs md:text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">
                         <span>{movie?.year || "2024"}</span>
                         <span className="uppercase text-[10px] bg-gray-200 dark:bg-white/10 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 transition-colors">{movie?.media_type || 'Movie'}</span>
                     </div>

@@ -42,12 +42,12 @@ const AdminUsers = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+            className="flex flex-col md:flex-row bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
         >
             <AdminSidebar />
             <main className="flex-1 flex flex-col h-screen overflow-y-auto w-full bg-[#110C0C]">
                 <AdminTopbar />
-                <div className="p-8 pb-20 max-w-[1200px] w-full mx-auto space-y-10">
+                <div className="p-4 md:p-8 pb-20 max-w-[1200px] w-full mx-auto space-y-10">
                     <section className="bg-[#1A1414] border border-[#2A1E1E] rounded-[24px] p-8 md:p-10 shadow-xl overflow-x-auto">
                         <div className="flex justify-between items-end mb-8 min-w-[700px]">
                             <div>

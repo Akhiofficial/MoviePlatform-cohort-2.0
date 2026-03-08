@@ -49,7 +49,7 @@ export const HeroSkeleton = () => (
 // Skeleton for horizontal scrolling MovieCard (Home, MovieDetails)
 // aspect-2/3, min-w-[220px] -> matches MovieCard.jsx
 export const MovieCardSkeleton = () => (
-    <div className="flex flex-col gap-3 w-[220px] min-w-[220px] sm:w-[260px] sm:min-w-[260px] animate-pulse">
+    <div className="flex flex-col gap-3 w-[160px] min-w-[160px] sm:w-[200px] sm:min-w-[200px] md:w-[260px] md:min-w-[260px] animate-pulse">
         {/* Poster */}
         <div className="relative aspect-2/3 w-full rounded-2xl bg-[#1A1515] border border-white/5"></div>
         {/* Details */}
@@ -66,8 +66,8 @@ export const MovieCardSkeleton = () => (
 // Loader for horizontal trending/popular lists
 export const HorizontalLoader = () => (
     <div className="flex gap-6 animate-pulse px-2">
-        <div className="w-[220px] sm:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
-        <div className="w-[220px] sm:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
+        <div className="w-[160px] sm:w-[200px] md:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
+        <div className="w-[160px] sm:w-[200px] md:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
     </div>
 );
 
