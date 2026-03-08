@@ -78,14 +78,21 @@ export const UserActivityProvider = ({ children }) => {
     };
 
     // --- HISTORY ---
-    const addToHistory = async (movie) => {
+    const addToHistory = async (movie, progress = null) => {
         if (!user) return; // Only track logged in users
         try {
-            await api.post('/history', {
-                movieId: movie.id?.toString(),
+            const data = {
+                movieId: movie.id?.toString() || movie.movieId,
                 title: movie.title || movie.name,
-                poster: movie.poster_path
-            });
+                poster: movie.poster || movie.poster_path
+            };
+
+            if (progress) {
+                data.currentTime = progress.currentTime;
+                data.duration = progress.duration;
+            }
+
+            await api.post('/history', data);
             // Refresh history to get the new sorted order/timestamps
             const histRes = await api.get('/history');
             setHistory(histRes.data.history || []);

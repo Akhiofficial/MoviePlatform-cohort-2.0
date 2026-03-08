@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Clapperboard, Search, LogOut, User } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Clapperboard, Search, LogOut, User, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
@@ -8,6 +8,7 @@ const Navbar = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const { user, logout } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -21,6 +22,7 @@ const Navbar = () => {
         e.preventDefault();
         if (searchQuery.trim()) {
             navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+            setSearchQuery('');
         }
     };
 
@@ -44,7 +46,10 @@ const Navbar = () => {
                         <Link to="/movies" className="hover:text-white transition-colors">Movies</Link>
                         <Link to="/tv" className="hover:text-white transition-colors">TV Shows</Link>
                         {user && (
-                            <Link to="/favorites" className="hover:text-white transition-colors">My List</Link>
+                            <>
+                                <Link to="/favorites" className="hover:text-white transition-colors">My List</Link>
+                                <Link to="/history" className="hover:text-white transition-colors">History</Link>
+                            </>
                         )}
                     </div>
                 </div>
@@ -69,6 +74,15 @@ const Navbar = () => {
                                     <User className="w-4 h-4" />
                                     <span>{user.fullname || user.name || 'User'}</span>
                                 </div>
+                                {user.role === 'admin' && location.pathname === '/' && (
+                                    <Link
+                                        to="/admin"
+                                        className="flex items-center gap-1.5 bg-brand-red/20 hover:bg-brand-red/30 text-brand-red px-4 py-2 rounded-full transition-colors border border-brand-red/30 font-bold shadow-[0_0_10px_rgba(229,9,20,0.1)]"
+                                    >
+                                        <ShieldCheck className="w-4 h-4" />
+                                        <span className="hidden md:inline text-xs">Admin Panel</span>
+                                    </Link>
+                                )}
                                 <button
                                     onClick={handleLogout}
                                     className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full transition-colors border border-white/10"

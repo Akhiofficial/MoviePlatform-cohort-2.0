@@ -29,6 +29,22 @@ const movieSchema = new mongoose.Schema(
         category: {
             type: String,
             required: true,
+        },
+        director: {
+            type: String,
+            default: 'Unknown'
+        },
+        budget: {
+            type: String,
+            default: 'Unknown'
+        },
+        revenue: {
+            type: String,
+            default: 'Unknown'
+        },
+        duration: {
+            type: Number,
+            default: 120
         }
     },
     { timestamps: true }

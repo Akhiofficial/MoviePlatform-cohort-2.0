@@ -21,11 +21,14 @@ export const getMovieDetails = (id) =>
 export const getSimilarMovies = (id) =>
     api.get(`/movie/${id}/similar?api_key=${API_KEY}`)
 
-export const getDiscoverMovies = (page = 1) =>
-    api.get(`/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=popularity.desc`)
+export const getGenres = (type = 'movie') =>
+    api.get(`/genre/${type}/list?api_key=${API_KEY}`)
 
-export const getDiscoverTvShows = (page = 1) =>
-    api.get(`/discover/tv?api_key=${API_KEY}&page=${page}&sort_by=popularity.desc`)
+export const getDiscoverMovies = (page = 1, genreId = '') =>
+    api.get(`/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=popularity.desc${genreId ? `&with_genres=${genreId}` : ''}`)
+
+export const getDiscoverTvShows = (page = 1, genreId = '') =>
+    api.get(`/discover/tv?api_key=${API_KEY}&page=${page}&sort_by=popularity.desc${genreId ? `&with_genres=${genreId}` : ''}`)
 
 export const searchMovies = (query, page = 1) =>
     api.get(`/search/multi?api_key=${API_KEY}&query=${query}&page=${page}`)

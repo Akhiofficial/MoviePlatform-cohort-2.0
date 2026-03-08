@@ -5,22 +5,26 @@ const historyModel = require('../models/history.model');
 // @access  Private
 const addHistory = async (req, res) => {
     try {
-        const { movieId, title, poster } = req.body;
+        const { movieId, title, poster, currentTime, duration } = req.body;
 
         if (!movieId || !title || !poster) {
             return res.status(400).json({ message: 'Please provide all required fields (movieId, title, poster)' });
         }
 
-        // Upsert behavior: If it exists, update watchedAt to now. If not, create it.
+        const updateData = {
+            user: req.user._id,
+            movieId,
+            title,
+            poster,
+            watchedAt: Date.now()
+        };
+
+        if (currentTime !== undefined) updateData.currentTime = currentTime;
+        if (duration !== undefined) updateData.duration = duration;
+
         const history = await historyModel.findOneAndUpdate(
             { user: req.user._id, movieId },
-            {
-                user: req.user._id,
-                movieId,
-                title,
-                poster,
-                watchedAt: Date.now()
-            },
+            updateData,
             { new: true, upsert: true }
         );
 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { Play, Filter, Plus, Star } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Play, Filter, Plus, Star, Shuffle, SortAsc, SortDesc } from 'lucide-react';
 import { useUserActivity } from '../context/UserActivityContext';
 
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +53,30 @@ const AddNewCard = () => (
 
 const Favorites = () => {
   const { favorites } = useUserActivity();
+  const [items, setItems] = useState([]);
+  const [sortOrder, setSortOrder] = useState('none'); // 'none', 'asc', 'desc'
+
+  useEffect(() => {
+    setItems(favorites);
+  }, [favorites]);
+
+  const handleShuffle = () => {
+    if (items.length > 0) {
+      const shuffled = [...items].sort(() => Math.random() - 0.5);
+      setItems(shuffled);
+      setSortOrder('none');
+    }
+  };
+
+  const handleSort = () => {
+    const nextOrder = sortOrder === 'asc' ? 'desc' : 'asc';
+    const sorted = [...items].sort((a, b) => {
+      if (nextOrder === 'asc') return a.title.localeCompare(b.title);
+      return b.title.localeCompare(a.title);
+    });
+    setItems(sorted);
+    setSortOrder(nextOrder);
+  };
 
   return (
     <div className="min-h-screen bg-[#141010] text-white pt-32 pb-24">
@@ -75,19 +99,26 @@ const Favorites = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-brand-red/20 text-sm">
-              <Play className="w-4 h-4 fill-current" />
-              Play Shuffle
+            <button
+              onClick={handleShuffle}
+              className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-brand-red/20 text-sm"
+            >
+              <Shuffle className="w-4 h-4" />
+              Shuffle Collections
             </button>
-            <button className="flex items-center justify-center w-12 h-12 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors">
-              <Filter className="w-5 h-5 text-white" />
+            <button
+              onClick={handleSort}
+              className={`flex items-center justify-center w-12 h-12 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors ${sortOrder !== 'none' ? 'text-brand-red border-brand-red/50' : 'text-white'}`}
+              title={sortOrder === 'asc' ? 'Sort Z-A' : 'Sort A-Z'}
+            >
+              {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : sortOrder === 'desc' ? <SortDesc className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
             </button>
           </div>
         </div>
 
         {/* Favorites Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-10 mb-20">
-          {favorites.map((movie) => (
+          {items.map((movie) => (
             <FavoriteCard key={movie.movieId} movie={movie} />
           ))}
           {/* Static Add New Card at the end */}

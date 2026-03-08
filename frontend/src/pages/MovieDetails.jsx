@@ -1,20 +1,25 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Heart, Star, Calendar, Clock, User } from 'lucide-react';
+import ReactPlayer from 'react-player';
 import MovieCard from '../components/MovieCard';
 import { HeroSkeleton } from '../components/Loader';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, getSimilarMovies } from '../services/tmdb';
 import { useUserActivity } from '../context/UserActivityContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, api } from '../context/AuthContext';
 
 const MovieDetails = () => {
   const { id } = useParams();
-  const { isFavorite, toggleFavorite, addToHistory } = useUserActivity();
+  const { isFavorite, toggleFavorite, addToHistory, history } = useUserActivity();
   const { user } = useAuth();
+  const playerRef = useRef(null);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [movie, setMovie] = useState(null);
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [watchProgress, setWatchProgress] = useState({ currentTime: 0, duration: 0 });
+  const [lastSyncTime, setLastSyncTime] = useState(0);
 
   // We need to pass the ID properly to check if it's favorited. TMDB ID is technically a number, but useParams is a string. Check conversion later if needed.
   const isFav = movie ? isFavorite(movie.id) : false;
@@ -23,58 +28,95 @@ const MovieDetails = () => {
     const fetchMovieData = async () => {
       setLoading(true);
       try {
-        const [detailsRes, similarRes] = await Promise.all([
-          getMovieDetails(id),
-          getSimilarMovies(id)
-        ]);
+        const isLocal = isNaN(id) && id.length === 24; // MongoDB ObjectIds are 24-char hex strings
 
-        const data = detailsRes.data;
+        if (isLocal) {
+          // Fetch from local backend
+          const res = await api.get(`/movies/${id}`);
+          const data = res.data.movie;
 
-        // Find a YouTube trailer
-        const trailerVideo = data.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer');
+          const extractYoutubeId = (url) => {
+            if (!url) return null;
+            const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+            const match = url.match(regExp);
+            return (match && match[7].length === 11) ? match[7] : null;
+          };
 
-        // Find Director
-        const directorInfo = data.credits?.crew?.find(person => person.job === 'Director');
+          const formattedMovie = {
+            id: data._id,
+            media_type: data.category ? data.category.toLowerCase() : 'movie',
+            title: data.title,
+            rating: 'N/A',
+            stars: '0.0',
+            year: data.releaseDate ? new Date(data.releaseDate).getFullYear() : 'Unknown',
+            duration: data.duration ? `${Math.floor(data.duration / 60)}h ${data.duration % 60}m` : 'N/A',
+            director: data.director || 'Unknown',
+            budget: data.budget !== 'Unknown' && data.budget ? `$${data.budget}` : 'Unknown',
+            revenue: data.revenue !== 'Unknown' && data.revenue ? `$${data.revenue}` : 'Unknown',
+            genres: [data.genre].filter(Boolean) || [],
+            backdrop: data.poster,
+            poster: data.poster,
+            synopsis: data.description || 'No synopsis available.',
+            cast: [],
+            trailerKey: extractYoutubeId(data.trailer),
+            trailerPreview: data.poster,
+          };
 
-        // Formatted Data for UI
-        const formattedMovie = {
-          id: data.id,
-          media_type: data.title ? 'movie' : 'tv', // Keep logic robust
-          title: data.title || data.name,
-          rating: data.vote_average ? `${data.vote_average.toFixed(1)}/10 IMDb` : 'N/A',
-          stars: data.vote_average ? (data.vote_average / 2).toFixed(1) : '0.0',
-          year: (data.release_date || data.first_air_date || '').split('-')[0] || 'Unknown',
-          duration: data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : 'N/A',
-          director: directorInfo ? directorInfo.name : 'Unknown',
-          budget: data.budget ? `$${(data.budget / 1000000).toFixed(1)} Million` : 'Unknown',
-          revenue: data.revenue ? `$${(data.revenue / 1000000).toFixed(1)} Million` : 'Unknown',
-          genres: data.genres?.map(g => g.name) || [],
-          backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop',
-          poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072&auto=format&fit=crop',
-          synopsis: data.overview || 'No synopsis available.',
-          cast: data.credits?.cast?.slice(0, 6).map(actor => ({
-            id: actor.id,
-            name: actor.name,
-            role: actor.character,
-            image: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 'https://via.placeholder.com/200x300?text=No+Image'
-          })) || [],
-          trailerKey: trailerVideo ? trailerVideo.key : null,
-          trailerPreview: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop',
-        };
+          setMovie(formattedMovie);
+          addToHistory(formattedMovie);
+          setSimilarMovies([]); // Empty or fetch generic similar local movies
+        } else {
+          // Fetch from TMDB
+          const [detailsRes, similarRes] = await Promise.all([
+            getMovieDetails(id),
+            getSimilarMovies(id)
+          ]);
 
-        setMovie(formattedMovie);
+          const data = detailsRes.data;
 
-        // Format Similar Movies
-        const similar = similarRes.data.results.map(item => ({
-          id: item.id,
-          title: item.title,
-          rating: item.vote_average ? parseFloat((item.vote_average / 2).toFixed(1)) : 'N/A',
-          year: (item.release_date || '').split('-')[0],
-          poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        })).slice(0, 10);
+          const trailerVideo = data.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') ||
+            data.videos?.results?.find(vid => vid.site === 'YouTube');
 
-        setSimilarMovies(similar);
+          const directorInfo = data.credits?.crew?.find(person => person.job === 'Director');
 
+          const formattedMovie = {
+            id: data.id,
+            media_type: data.title ? 'movie' : 'tv',
+            title: data.title || data.name,
+            rating: data.vote_average ? `${data.vote_average.toFixed(1)}/10 IMDb` : 'N/A',
+            stars: data.vote_average ? (data.vote_average / 2).toFixed(1) : '0.0',
+            year: (data.release_date || data.first_air_date || '').split('-')[0] || 'Unknown',
+            duration: data.runtime ? `${Math.floor(data.runtime / 60)}h ${data.runtime % 60}m` : 'N/A',
+            director: directorInfo ? directorInfo.name : 'Unknown',
+            budget: data.budget ? `$${(data.budget / 1000000).toFixed(1)} Million` : 'Unknown',
+            revenue: data.revenue ? `$${(data.revenue / 1000000).toFixed(1)} Million` : 'Unknown',
+            genres: data.genres?.map(g => g.name) || [],
+            backdrop: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop',
+            poster: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : 'https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?q=80&w=2072&auto=format&fit=crop',
+            synopsis: data.overview || 'No synopsis available.',
+            cast: data.credits?.cast?.slice(0, 6).map(actor => ({
+              id: actor.id,
+              name: actor.name,
+              role: actor.character,
+              image: actor.profile_path ? `https://image.tmdb.org/t/p/w200${actor.profile_path}` : 'https://via.placeholder.com/200x300?text=No+Image'
+            })) || [],
+            trailerKey: trailerVideo ? trailerVideo.key : null,
+            trailerPreview: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop',
+          };
+
+          setMovie(formattedMovie);
+          addToHistory(formattedMovie);
+
+          const similar = similarRes.data.results.map(item => ({
+            id: item.id,
+            title: item.title,
+            rating: item.vote_average ? parseFloat((item.vote_average / 2).toFixed(1)) : 'N/A',
+            year: (item.release_date || '').split('-')[0],
+            poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+          })).slice(0, 10);
+
+          setSimilarMovies(similar);
+        }
       } catch (error) {
         console.error("Error fetching movie details:", error);
       } finally {
@@ -230,7 +272,7 @@ const MovieDetails = () => {
         </div>
 
         {/* Main Cast */}
-        {movie.cast.length > 0 && (
+        {movie.cast && movie.cast.length > 0 && (
           <div className="space-y-6">
             <h3 className="text-2xl font-bold">Main Cast</h3>
             <div className="flex gap-6 md:gap-10 overflow-x-auto pb-4 no-scrollbar">
@@ -253,10 +295,14 @@ const MovieDetails = () => {
             <h3 className="text-2xl font-bold">Video Spotlight</h3>
             <div className="relative w-full aspect-video rounded-[24px] overflow-hidden group border border-white/10 shadow-2xl bg-black">
               {!isVideoPlaying ? (
-                <div className="w-full h-full cursor-pointer" onClick={() => {
-                  setIsVideoPlaying(true);
-                  addToHistory(movie);
-                }}>
+                <div
+                  className="w-full h-full cursor-pointer relative"
+                  onClick={() => {
+                    setIsVideoPlaying(true);
+                    setIsPlaying(true);
+                    addToHistory(movie);
+                  }}
+                >
                   <img src={movie.trailerPreview} alt="Trailer preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <div className="w-20 h-20 bg-brand-red rounded-full flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-[0_0_30px_rgba(229,9,20,0.6)]">
@@ -268,15 +314,47 @@ const MovieDetails = () => {
                   </div>
                 </div>
               ) : (
-                <iframe
-                  className="w-full h-full"
-                  src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1`}
-                  title="YouTube video player"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                ></iframe>
+                <div className="w-full h-full relative">
+                  <ReactPlayer
+                    ref={playerRef}
+                    src={`https://www.youtube.com/watch?v=${movie.trailerKey}`}
+                    width="100%"
+                    height="100%"
+                    className="absolute top-0 left-0"
+                    playing={isPlaying}
+                    controls={true}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    onReady={() => {
+                      try {
+                        const savedHistory = history.find(h => h.movieId === (movie.id?.toString() || id));
+                        if (savedHistory && savedHistory.currentTime > 0 && playerRef.current) {
+                          playerRef.current.seekTo(savedHistory.currentTime, 'seconds');
+                        }
+                      } catch (err) {
+                        console.error("Seeking error:", err);
+                      }
+                    }}
+                    onError={(e) => console.error("ReactPlayer Error:", e)}
+                    onTimeUpdate={(e) => {
+                      const currentTime = Math.floor(e.target.currentTime);
+                      setWatchProgress(prev => ({ ...prev, currentTime }));
+
+                      if (currentTime - lastSyncTime >= 10) {
+                        addToHistory(movie, { currentTime, duration: watchProgress.duration });
+                        setLastSyncTime(currentTime);
+                      }
+                    }}
+                    onDurationChange={(e) => {
+                      setWatchProgress(prev => ({ ...prev, duration: Math.floor(e.target.duration) }));
+                    }}
+                    config={{
+                      youtube: {
+                        playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
+                      }
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>

@@ -1,9 +1,11 @@
 import React from 'react';
-import { Clapperboard, LayoutDashboard, Film, Users, Plus, Settings } from 'lucide-react';
+import { Clapperboard, LayoutDashboard, Film, Users, Plus, Settings, Home } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const AdminSidebar = () => {
     const location = useLocation();
+    const { user } = useAuth();
     const isActive = (path) => location.pathname === path;
 
     return (
@@ -22,6 +24,11 @@ const AdminSidebar = () => {
 
                 {/* Nav Links */}
                 <nav className="px-5 space-y-2">
+                    <Link to="/" className="flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] transition-all font-medium text-[14px] text-gray-400 hover:text-white hover:bg-white/5 border border-white/5 mb-4 group cursor-pointer">
+                        <Home className="w-[18px] h-[18px] shrink-0 text-gray-500 group-hover:text-white transition-colors" />
+                        Return to Public View
+                    </Link>
+
                     <Link to="/admin" className={`flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] transition-all font-medium text-[14px] ${isActive('/admin') ? 'bg-brand-red text-white shadow-[0_4px_16px_0_rgba(229,9,20,0.3)] font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
                         <LayoutDashboard className={`w-[18px] h-[18px] shrink-0 ${isActive('/admin') ? 'fill-current opacity-20' : ''}`} />
                         Dashboard
@@ -30,12 +37,12 @@ const AdminSidebar = () => {
                         <Film className={`w-[18px] h-[18px] shrink-0 ${isActive('/admin/movies') ? 'fill-current opacity-20' : ''}`} />
                         Manage Movies
                     </Link>
-                    <Link to="#" className="flex items-center gap-3.5 px-4 py-3.5 text-gray-400 hover:text-white rounded-[14px] hover:bg-white/5 transition-all font-medium text-[14px]">
-                        <Users className="w-[18px] h-[18px] shrink-0" />
+                    <Link to="/admin/users" className={`flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] transition-all font-medium text-[14px] ${isActive('/admin/users') ? 'bg-brand-red text-white shadow-[0_4px_16px_0_rgba(229,9,20,0.3)] font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                        <Users className={`w-[18px] h-[18px] shrink-0 ${isActive('/admin/users') ? 'fill-current opacity-20' : ''}`} />
                         Users
                     </Link>
-                    <Link to="/admin/movies" className="flex items-center gap-3.5 px-4 py-3.5 text-gray-400 hover:text-white rounded-[14px] hover:bg-white/5 transition-all font-medium text-[14px]">
-                        <Plus className="w-[18px] h-[18px] shrink-0" />
+                    <Link to="/admin/add-movie" className={`flex items-center gap-3.5 px-4 py-3.5 rounded-[14px] transition-all font-medium text-[14px] ${isActive('/admin/add-movie') ? 'bg-brand-red text-white shadow-[0_4px_16px_0_rgba(229,9,20,0.3)] font-bold' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                        <Plus className={`w-[18px] h-[18px] shrink-0 ${isActive('/admin/add-movie') ? 'fill-current opacity-20' : ''}`} />
                         Add Movie
                     </Link>
                 </nav>
@@ -50,11 +57,10 @@ const AdminSidebar = () => {
                             <img src="https://i.pravatar.cc/150?img=33" alt="Admin" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-[13px] font-bold text-white leading-tight">Alex Rivera</span>
-                            <span className="text-[11px] text-gray-500 font-medium mt-0.5">Super Admin</span>
+                            <span className="text-[13px] font-bold text-white leading-tight truncate w-[120px]">{user?.fullname || user?.name || 'Admin User'}</span>
+                            <span className="text-[11px] text-gray-500 font-medium mt-0.5">Admin Role</span>
                         </div>
                     </div>
-                    <Settings className="w-4 h-4 text-gray-500 hover:text-white transition-colors" />
                 </div>
             </div>
         </aside>

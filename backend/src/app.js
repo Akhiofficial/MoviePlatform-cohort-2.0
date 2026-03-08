@@ -18,12 +18,14 @@ const favoriteRoutes = require("./routes/favorite.route");
 const historyRoutes = require("./routes/history.route");
 const adminMovieRoutes = require("./routes/adminMovie.route");
 const adminUserRoutes = require("./routes/adminUser.route");
+const movieRoutes = require("./routes/movie.route");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/admin/movies", adminMovieRoutes);
 app.use("/api/admin/users", adminUserRoutes);
+app.use("/api/movies", movieRoutes);
 
 
 

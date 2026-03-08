@@ -1,7 +1,48 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import { Users, Film, Eye, TrendingUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { api } from '../context/AuthContext';
 
 const DashboardOverview = () => {
+    const [stats, setStats] = useState({
+        totalUsers: 0,
+        moviesLibrary: 0,
+        totalViews: '50.2k',
+        users: [],
+        movies: []
+    });
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const [usersRes, moviesRes] = await Promise.all([
+                    api.get('/admin/users'),
+                    api.get('/admin/movies')
+                ]);
+                setStats({
+                    totalUsers: usersRes.data.count,
+                    moviesLibrary: moviesRes.data.count,
+                    totalViews: '50.2k',
+                    users: usersRes.data.users.slice(0, 4),
+                    movies: moviesRes.data.movies.slice(0, 6)
+                });
+            } catch (error) {
+                console.error("Error fetching dashboard data", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchDashboardData();
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="flex-1 flex justify-center items-center h-full min-h-[400px]">
+                <div className="w-10 h-10 border-4 border-brand-red/30 border-t-brand-red rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="px-10 pb-12 w-full mx-auto space-y-6">
 
@@ -13,7 +54,7 @@ const DashboardOverview = () => {
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-gray-400 text-[13px] font-semibold mb-1">Total Users</h3>
-                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">1,240</p>
+                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">{stats.totalUsers}</p>
                         </div>
                         <div className="w-[42px] h-[42px] bg-brand-red/10 rounded-[14px] flex items-center justify-center text-brand-red">
                             <Users className="w-5 h-5 fill-current opacity-20" />
@@ -30,7 +71,7 @@ const DashboardOverview = () => {
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-gray-400 text-[13px] font-semibold mb-1">Movies Library</h3>
-                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">450</p>
+                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">{stats.moviesLibrary}</p>
                         </div>
                         <div className="w-[42px] h-[42px] bg-brand-red/10 rounded-[14px] flex items-center justify-center text-brand-red">
                             <Film className="w-5 h-5 fill-current opacity-20" />
@@ -47,7 +88,7 @@ const DashboardOverview = () => {
                     <div className="flex justify-between items-start mb-4">
                         <div>
                             <h3 className="text-gray-400 text-[13px] font-semibold mb-1">Total Views</h3>
-                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">50.2k</p>
+                            <p className="text-[28px] font-bold text-white leading-tight tracking-tight">{stats.totalViews}</p>
                         </div>
                         <div className="w-[42px] h-[42px] bg-brand-red/10 rounded-[14px] flex items-center justify-center text-brand-red">
                             <Eye className="w-5 h-5 fill-current opacity-20" />
@@ -109,50 +150,25 @@ const DashboardOverview = () => {
                     </div>
 
                     <div className="space-y-6">
-                        {/* User 1 */}
-                        <div className="flex items-center justify-between group cursor-pointer">
-                            <div className="flex items-center gap-3.5">
-                                <img src="https://i.pravatar.cc/150?img=5" alt="User" className="w-10 h-10 rounded-full border border-white/5 object-cover" />
-                                <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-white group-hover:text-brand-red transition-colors">Sarah Jenkins</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">sarah.j@example.com</span>
+                        {stats.users.map((user) => (
+                            <div key={user._id} className="flex items-center justify-between group cursor-pointer">
+                                <div className="flex items-center gap-3.5">
+                                    <div className="w-10 h-10 rounded-full border border-white/5 bg-[#302020] flex items-center justify-center text-white font-bold text-[15px]">
+                                        {user.fullname ? user.fullname.charAt(0).toUpperCase() : '?'}
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <span className="text-[13px] font-bold text-white group-hover:text-brand-red transition-colors">{user.fullname}</span>
+                                        <span className="text-[11px] text-gray-500 font-medium">{user.email}</span>
+                                    </div>
                                 </div>
+                                <span className="text-[10px] font-bold text-gray-500 tracking-wider">
+                                    {new Date(user.createdAt).toLocaleDateString()}
+                                </span>
                             </div>
-                            <span className="text-[10px] font-bold text-gray-500 tracking-wider">2M AGO</span>
-                        </div>
-                        {/* User 2 */}
-                        <div className="flex items-center justify-between group cursor-pointer">
-                            <div className="flex items-center gap-3.5">
-                                <img src="https://i.pravatar.cc/150?img=12" alt="User" className="w-10 h-10 rounded-full border border-white/5 object-cover" />
-                                <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-white group-hover:text-brand-red transition-colors">Marcus Thorne</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">m.thorne@mail.io</span>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-500 tracking-wider">15M AGO</span>
-                        </div>
-                        {/* User 3 */}
-                        <div className="flex items-center justify-between group cursor-pointer">
-                            <div className="flex items-center gap-3.5">
-                                <img src="https://i.pravatar.cc/150?img=20" alt="User" className="w-10 h-10 rounded-full border border-white/5 object-cover" />
-                                <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-white group-hover:text-brand-red transition-colors">Lila Chen</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">lila_c@design.co</span>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-500 tracking-wider">1H AGO</span>
-                        </div>
-                        {/* User 4 */}
-                        <div className="flex items-center justify-between group cursor-pointer">
-                            <div className="flex items-center gap-3.5">
-                                <img src="https://i.pravatar.cc/150?img=34" alt="User" className="w-10 h-10 rounded-full border border-white/5 object-cover" />
-                                <div className="flex flex-col">
-                                    <span className="text-[13px] font-bold text-white group-hover:text-brand-red transition-colors">David Wilson</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">david.w@tech.org</span>
-                                </div>
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-500 tracking-wider">3H AGO</span>
-                        </div>
+                        ))}
+                        {stats.users.length === 0 && (
+                            <div className="text-sm text-gray-500 text-center py-4">No recent signups.</div>
+                        )}
                     </div>
                 </div>
 
@@ -175,61 +191,23 @@ const DashboardOverview = () => {
 
                 {/* Cards Grid / Flex */}
                 <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-5">
-
-                    {/* Card 1 */}
-                    <div className="group cursor-pointer">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=2025&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
+                    {stats.movies.length > 0 ? stats.movies.map((movie) => (
+                        <div key={movie._id} className="group cursor-pointer">
+                            <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow bg-[#222]">
+                                {movie.poster ? (
+                                    <img src={movie.poster} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={movie.title} />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center p-4">
+                                        <span className="text-white text-center text-sm font-medium">{movie.title}</span>
+                                    </div>
+                                )}
+                            </div>
+                            <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">{movie.title}</h4>
+                            <p className="text-[11px] font-medium text-gray-500">{movie.genre || 'Movie'} • {new Date(movie.releaseDate).getFullYear() || 'N/A'}</p>
                         </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">Interstellar Voyage</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Sci-Fi • 2024</p>
-                    </div>
-
-                    {/* Card 2 */}
-                    <div className="group cursor-pointer">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1542204165-65bf26472b9b?q=80&w=2074&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
-                        </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">The Silent Room</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Thriller • 2023</p>
-                    </div>
-
-                    {/* Card 3 */}
-                    <div className="group cursor-pointer shrink-0">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
-                        </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">Neon City Nights</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Action • 2024</p>
-                    </div>
-
-                    {/* Card 4 */}
-                    <div className="group cursor-pointer shrink-0">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1535016120720-40c746a51d8b?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
-                        </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">Shadow of Doubt</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Drama • 2024</p>
-                    </div>
-
-                    {/* Card 5 */}
-                    <div className="group cursor-pointer hidden md:block shrink-0">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
-                        </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">Ethereal Realm</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Fantasy • 2023</p>
-                    </div>
-
-                    {/* Card 6 */}
-                    <div className="group cursor-pointer hidden lg:block shrink-0">
-                        <div className="aspect-2/3 rounded-xl overflow-hidden border border-white/5 mb-3 shadow-lg group-hover:shadow-brand-red/10 transition-shadow">
-                            <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?q=80&w=2070&auto=format&fit=crop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Poster" />
-                        </div>
-                        <h4 className="text-[13px] font-bold text-white text-ellipsis overflow-hidden whitespace-nowrap mb-0.5 group-hover:text-brand-red transition-colors">Retro Frame</h4>
-                        <p className="text-[11px] font-medium text-gray-500">Documentary • 2022</p>
-                    </div>
-
+                    )) : (
+                        <div className="col-span-full text-center text-gray-500 py-10">No movies added yet.</div>
+                    )}
                 </div>
             </div>
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Filter, Star, Heart } from 'lucide-react';
+import { Play, Filter, Star, Heart, Shuffle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getDiscoverTvShows } from '../services/tmdb';
+import { getDiscoverTvShows, getGenres } from '../services/tmdb';
 import { GridCardSkeleton } from '../components/Loader';
 import { useUserActivity } from '../context/UserActivityContext';
 import { useAuth } from '../context/AuthContext';
@@ -73,6 +73,8 @@ const FavoriteMovieCard = ({ movie }) => {
 
 const TvShowPage = () => {
     const [shows, setShows] = useState([]);
+    const [genres, setGenres] = useState([]);
+    const [selectedGenre, setSelectedGenre] = useState('');
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
@@ -86,10 +88,22 @@ const TvShowPage = () => {
     const loaderRef = useInfiniteScroll(loadMoreShows, hasMore);
 
     useEffect(() => {
+        const fetchGenres = async () => {
+            try {
+                const response = await getGenres('tv');
+                setGenres(response.data.genres || []);
+            } catch (error) {
+                console.error("Error fetching genres:", error);
+            }
+        };
+        fetchGenres();
+    }, []);
+
+    useEffect(() => {
         const fetchShows = async () => {
             if (page === 1) setLoading(true);
             try {
-                const response = await getDiscoverTvShows(page);
+                const response = await getDiscoverTvShows(page, selectedGenre);
                 const formattedShows = response.data.results.map(item => ({
                     id: item.id,
                     title: item.name || item.original_name, // TV Shows use 'name' instead of 'title'
@@ -114,7 +128,21 @@ const TvShowPage = () => {
 
         fetchShows();
         if (page === 1) window.scrollTo(0, 0);
-    }, [page]);
+    }, [page, selectedGenre]);
+
+    const handleGenreSelect = (genreId) => {
+        setSelectedGenre(genreId);
+        setPage(1);
+        setShows([]);
+        setHasMore(true);
+    };
+
+    const handleShuffle = () => {
+        if (shows.length > 0) {
+            const shuffled = [...shows].sort(() => Math.random() - 0.5);
+            setShows(shuffled);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#110C0C] text-white pt-[100px] pb-24">
@@ -132,14 +160,33 @@ const TvShowPage = () => {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <button className="flex items-center gap-2 bg-[#F40612] hover:bg-red-700 text-white px-6 py-2.5 rounded-[4px] font-bold transition-transform hover:scale-105 active:scale-95 text-sm cursor-pointer">
-                            <Play className="w-4 h-4 fill-current" />
-                            Play Shuffle
-                        </button>
-                        <button className="flex items-center justify-center w-[42px] h-[42px] bg-transparent hover:bg-white/5 rounded-[4px] border border-white/20 transition-colors cursor-pointer">
-                            <Filter className="w-4 h-4 text-white" />
+                        <button
+                            onClick={handleShuffle}
+                            className="flex items-center gap-2 bg-[#F40612] hover:bg-red-700 text-white px-6 py-2.5 rounded-[4px] font-bold transition-transform hover:scale-105 active:scale-95 text-sm cursor-pointer"
+                        >
+                            <Shuffle className="w-4 h-4" />
+                            Shuffle Collections
                         </button>
                     </div>
+                </div>
+
+                {/* Genre Bar */}
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 -mx-6 px-6 lg:-mx-12 lg:px-12">
+                    <button
+                        onClick={() => handleGenreSelect('')}
+                        className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === '' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                    >
+                        All
+                    </button>
+                    {genres.map((genre) => (
+                        <button
+                            key={genre.id}
+                            onClick={() => handleGenreSelect(genre.id)}
+                            className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                        >
+                            {genre.name}
+                        </button>
+                    ))}
                 </div>
 
                 {/* Shows Grid */}

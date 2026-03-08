@@ -5,12 +5,14 @@ import { HeroSkeleton, MovieCardSkeleton } from '../components/Loader';
 import { Link } from 'react-router-dom';
 import { getTrending, getPopular, getTopRatedTv } from '../services/tmdb';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import { api } from '../context/AuthContext';
 
 const Home = () => {
     // Media States
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [popularMovies, setPopularMovies] = useState([]);
     const [topRatedTvShows, setTopRatedTvShows] = useState([]);
+    const [ourMovies, setOurMovies] = useState([]);
     const [heroMovie, setHeroMovie] = useState(null);
 
     // Page & Loading States
@@ -42,19 +44,32 @@ const Home = () => {
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [trendingRes, popularRes, topRatedTvRes] = await Promise.all([
+                const [trendingRes, popularRes, topRatedTvRes, ourMoviesRes] = await Promise.all([
                     getTrending(1),
                     getPopular(1),
-                    getTopRatedTv(1)
+                    getTopRatedTv(1),
+                    api.get('/movies').catch(e => ({ data: { movies: [] } }))
                 ]);
 
                 const trending = trendingRes.data.results.map(mapData);
                 const popular = popularRes.data.results.map(mapData);
                 const tvShows = topRatedTvRes.data.results.map(mapData);
+                const localMovies = ourMoviesRes.data.movies.map(item => ({
+                    id: item._id, // use MongoDB _id as id
+                    title: item.title,
+                    rating: 'N/A', // Update if backend tracks rating
+                    year: item.releaseDate ? new Date(item.releaseDate).getFullYear() : 'N/A',
+                    poster: item.poster,
+                    backdrop: item.poster,
+                    overview: item.description,
+                    media_type: item.category ? item.category.toLowerCase() : 'movie',
+                    isLocal: true
+                }));
 
                 setTrendingMovies(trending);
                 setPopularMovies(popular);
                 setTopRatedTvShows(tvShows);
+                setOurMovies(localMovies);
 
                 if (trending.length > 0) {
                     setHeroMovie(trending[0]);
@@ -185,9 +200,31 @@ const Home = () => {
 
             <div className="mx-auto px-6 lg:px-12 -mt-32 relative z-10 space-y-16">
 
+                {/* Our Latest Additions (Admin Movies) */}
+                {ourMovies.length > 0 && (
+                    <section>
+                        <div className="flex items-center justify-between mb-2 mt-30">
+                            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
+                                <TrendingUp className="w-6 h-6 text-brand-red" />
+                                Our Latest Additions
+                            </h2>
+                            <Link to="/movies" className="text-brand-red hover:text-[#F40612] font-semibold text-sm transition-colors border-2 border-transparent hover:border-brand-red/20 px-3 py-1 rounded-full pointer-events-auto">
+                                View All
+                            </Link>
+                        </div>
+                        <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
+                            {initialLoading ? renderSkeletons() : ourMovies.map((movie, index) => (
+                                <Link to={`/movie/${movie.id}`} key={`local-${movie.id}-${index}`} className="snap-start block shrink-0">
+                                    <MovieCard movie={movie} />
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
+                )}
+
                 {/* Trending Now */}
                 <section>
-                    <div className="flex items-center justify-between mb-2 mt-30">
+                    <div className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6" : "flex items-center justify-between mb-2 mt-30"}>
                         <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
                             <TrendingUp className="w-6 h-6 text-brand-red" />
                             Trending Now

@@ -9,8 +9,11 @@ import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Admin from "./pages/Admin"
 import AdminManageMovies from "./pages/AdminManageMovies"
+import AdminAddMovie from "./pages/AdminAddMovie"
+import AdminUsers from "./pages/AdminUsers"
 import MoviePage from "./pages/MoviePage"
 import TvShowPage from "./pages/TvShowPage"
+import History from "./pages/History"
 
 function App() {
   return (
@@ -21,6 +24,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/movies" element={<AdminManageMovies />} />
+          <Route path="/admin/add-movie" element={<AdminAddMovie />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
           <Route
             path="*"
             element={
@@ -31,6 +36,7 @@ function App() {
                   <Route path="/movie/:id" element={<MovieDetails />} />
                   <Route path="/search" element={<Search />} />
                   <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/history" element={<History />} />
                   <Route path="/movies" element={<MoviePage />} />
                   <Route path="/tv" element={<TvShowPage />} />
                 </Routes>
