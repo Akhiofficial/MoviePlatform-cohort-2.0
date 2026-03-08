@@ -81,10 +81,10 @@ const Navbar = () => {
 
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <div className="hidden sm:flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <Link to="/profile" className="hidden sm:flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-brand-red dark:hover:text-brand-red transition-colors">
                                     <User className="w-4 h-4" />
                                     <span>{user.fullname || user.name || 'User'}</span>
-                                </div>
+                                </Link>
                                 {user.role === 'admin' && location.pathname === '/' && (
                                     <Link
                                         to="/admin"

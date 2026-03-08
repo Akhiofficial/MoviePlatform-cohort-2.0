@@ -15,6 +15,7 @@ import AdminUsers from "./pages/AdminUsers"
 import MoviePage from "./pages/MoviePage"
 import TvShowPage from "./pages/TvShowPage"
 import History from "./pages/History"
+import Profile from "./pages/Profile"
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
                     <Route path="/history" element={<History />} />
                     <Route path="/movies" element={<MoviePage />} />
                     <Route path="/tv" element={<TvShowPage />} />
+                    <Route path="/profile" element={<Profile />} />
                   </Routes>
                   <Footer />
                 </>
