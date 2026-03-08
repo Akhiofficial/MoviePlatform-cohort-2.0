@@ -7,76 +7,74 @@ import { getTrending, getPopular, getTopRatedTv } from '../services/tmdb';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
 import { api } from '../context/AuthContext';
 
+import { motion } from 'framer-motion';
+
+import { HorizontalLoader } from '../components/Loader';
+
 const Home = () => {
-    // Media States
+    const [heroMovie, setHeroMovie] = useState(null);
     const [trendingMovies, setTrendingMovies] = useState([]);
     const [popularMovies, setPopularMovies] = useState([]);
     const [topRatedTvShows, setTopRatedTvShows] = useState([]);
     const [ourMovies, setOurMovies] = useState([]);
-    const [heroMovie, setHeroMovie] = useState(null);
-
-    // Page & Loading States
     const [initialLoading, setInitialLoading] = useState(true);
-    const [trendingPage, setTrendingPage] = useState(1);
-    const [popularPage, setPopularPage] = useState(1);
-    const [tvPage, setTvPage] = useState(1);
+
+    const [pageTrending, setPageTrending] = useState(1);
+    const [pagePopular, setPagePopular] = useState(1);
+    const [pageTv, setPageTv] = useState(1);
+
     const [hasMoreTrending, setHasMoreTrending] = useState(true);
     const [hasMorePopular, setHasMorePopular] = useState(true);
     const [hasMoreTv, setHasMoreTv] = useState(true);
 
-    // Loading indicator flags for infinite scroll dots
-    const [loadingTrending, setLoadingTrending] = useState(false);
-    const [loadingPopular, setLoadingPopular] = useState(false);
-    const [loadingTv, setLoadingTv] = useState(false);
+    const trendingRef = useInfiniteScroll(() => setPageTrending(p => p + 1), hasMoreTrending);
+    const popularRef = useInfiniteScroll(() => setPagePopular(p => p + 1), hasMorePopular);
+    const tvRef = useInfiniteScroll(() => setPageTv(p => p + 1), hasMoreTv);
 
-    const mapData = (item) => ({
-        id: item.id,
-        title: item.title || item.name,
-        rating: item.vote_average ? parseFloat((item.vote_average / 2).toFixed(1)) : 'N/A',
-        year: (item.release_date || item.first_air_date || '').split('-')[0],
-        poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
-        backdrop: item.backdrop_path ? `https://image.tmdb.org/t/p/original${item.backdrop_path}` : null,
-        overview: item.overview,
-        media_type: item.media_type || (item.title ? 'movie' : 'tv')
-    });
-
-    // Initial Fetch Effect
     useEffect(() => {
         const fetchInitialData = async () => {
             try {
-                const [trendingRes, popularRes, topRatedTvRes, ourMoviesRes] = await Promise.all([
-                    getTrending(1),
-                    getPopular(1),
-                    getTopRatedTv(1),
-                    api.get('/movies').catch(e => ({ data: { movies: [] } }))
-                ]);
-
-                const trending = trendingRes.data.results.map(mapData);
-                const popular = popularRes.data.results.map(mapData);
-                const tvShows = topRatedTvRes.data.results.map(mapData);
-                const localMovies = ourMoviesRes.data.movies.map(item => ({
-                    id: item._id, // use MongoDB _id as id
-                    title: item.title,
-                    rating: 'N/A', // Update if backend tracks rating
-                    year: item.releaseDate ? new Date(item.releaseDate).getFullYear() : 'N/A',
-                    poster: item.poster,
-                    backdrop: item.poster,
-                    overview: item.description,
-                    media_type: item.category ? item.category.toLowerCase() : 'movie',
-                    isLocal: true
+                // Fetch Our Latest Additions (Admin Movies)
+                const ourRes = await api.get('/movies');
+                const adminMovies = ourRes.data.movies.slice(0, 10).map(m => ({
+                    id: m._id,
+                    title: m.title,
+                    poster: m.poster,
+                    rating: 'N/A',
+                    year: m.releaseDate ? new Date(m.releaseDate).getFullYear() : 'N/A',
+                    genre: m.genre || 'Movie',
+                    media_type: 'movie'
                 }));
+                setOurMovies(adminMovies);
 
-                setTrendingMovies(trending);
-                setPopularMovies(popular);
-                setTopRatedTvShows(tvShows);
-                setOurMovies(localMovies);
+                // Fetch Hero and First pages
+                const trendingRes = await getTrending(1);
+                const results = trendingRes.data.results;
 
-                if (trending.length > 0) {
-                    setHeroMovie(trending[0]);
+                if (results.length > 0) {
+                    const hero = results[0];
+                    setHeroMovie({
+                        id: hero.id,
+                        title: hero.title || hero.name,
+                        overview: hero.overview,
+                        backdrop: hero.backdrop_path ? `https://image.tmdb.org/t/p/original${hero.backdrop_path}` : null,
+                        poster: hero.poster_path ? `https://image.tmdb.org/t/p/w500${hero.poster_path}` : null,
+                        year: (hero.release_date || hero.first_air_date || '').split('-')[0],
+                        media_type: hero.media_type
+                    });
+
+                    setTrendingMovies(results.map(formatMovie));
                 }
+
+                const popularRes = await getPopular(1);
+                setPopularMovies(popularRes.data.results.map(formatMovie));
+
+                const tvRes = await getTopRatedTv(1);
+                setTopRatedTvShows(tvRes.data.results.map(formatMovie));
+
+                setInitialLoading(false);
             } catch (error) {
-                console.error("Error fetching initial TMDB data:", error);
-            } finally {
+                console.error("Error loading home data:", error);
                 setInitialLoading(false);
             }
         };
@@ -84,80 +82,94 @@ const Home = () => {
         fetchInitialData();
     }, []);
 
-    // Load More Trending
-    const loadMoreTrending = async () => {
-        if (!hasMoreTrending || loadingTrending || initialLoading) return;
-        setLoadingTrending(true);
-        try {
-            const res = await getTrending(trendingPage + 1);
-            const newMovies = res.data.results.map(mapData);
-            setTrendingMovies(prev => [...prev, ...newMovies]);
-            setTrendingPage(prev => prev + 1);
-            if (newMovies.length === 0 || trendingPage >= res.data.total_pages) setHasMoreTrending(false);
-        } catch (error) {
-            console.error("Error loading more trending:", error);
-        } finally {
-            setLoadingTrending(false);
+    // Pagination effects
+    useEffect(() => {
+        if (pageTrending > 1) {
+            getTrending(pageTrending).then(res => {
+                const newMovies = res.data.results.map(formatMovie);
+                setTrendingMovies(prev => [...prev, ...newMovies]);
+                if (newMovies.length === 0) setHasMoreTrending(false);
+            });
+        }
+    }, [pageTrending]);
+
+    useEffect(() => {
+        if (pagePopular > 1) {
+            getPopular(pagePopular).then(res => {
+                const newMovies = res.data.results.map(formatMovie);
+                setPopularMovies(prev => [...prev, ...newMovies]);
+                if (newMovies.length === 0) setHasMorePopular(false);
+            });
+        }
+    }, [pagePopular]);
+
+    useEffect(() => {
+        if (pageTv > 1) {
+            getTopRatedTv(pageTv).then(res => {
+                const newMovies = res.data.results.map(formatMovie);
+                setTopRatedTvShows(prev => [...prev, ...newMovies]);
+                if (newMovies.length === 0) setHasMoreTv(false);
+            });
+        }
+    }, [pageTv]);
+
+    const formatMovie = (item) => ({
+        id: item.id,
+        title: item.title || item.name,
+        rating: item.vote_average ? parseFloat((item.vote_average / 2).toFixed(1)) : 'N/A',
+        year: (item.release_date || item.first_air_date || '').split('-')[0],
+        poster: item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null,
+        media_type: item.media_type || (item.first_air_date ? 'tv' : 'movie')
+    });
+
+    const renderSkeletons = () => [...Array(6)].map((_, i) => <MovieCardSkeleton key={i} />);
+
+    // Animation variants for hero content
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+                delayChildren: 0.3
+            }
         }
     };
 
-    // Load More Popular
-    const loadMorePopular = async () => {
-        if (!hasMorePopular || loadingPopular || initialLoading) return;
-        setLoadingPopular(true);
-        try {
-            const res = await getPopular(popularPage + 1);
-            const newMovies = res.data.results.map(mapData);
-            setPopularMovies(prev => [...prev, ...newMovies]);
-            setPopularPage(prev => prev + 1);
-            if (newMovies.length === 0 || popularPage >= res.data.total_pages) setHasMorePopular(false);
-        } catch (error) {
-            console.error("Error loading more popular:", error);
-        } finally {
-            setLoadingPopular(false);
+    const itemVariants = {
+        hidden: { y: 40, opacity: 0 },
+        visible: {
+            y: 0,
+            opacity: 1,
+            transition: { duration: 0.6, ease: "easeOut" }
         }
     };
 
-    // Load More TV Shows
-    const loadMoreTv = async () => {
-        if (!hasMoreTv || loadingTv || initialLoading) return;
-        setLoadingTv(true);
-        try {
-            const res = await getTopRatedTv(tvPage + 1);
-            const newShows = res.data.results.map(mapData);
-            setTopRatedTvShows(prev => [...prev, ...newShows]);
-            setTvPage(prev => prev + 1);
-            if (newShows.length === 0 || tvPage >= res.data.total_pages) setHasMoreTv(false);
-        } catch (error) {
-            console.error("Error loading more TV shows:", error);
-        } finally {
-            setLoadingTv(false);
+    const headingVariants = {
+        hidden: { x: -20, opacity: 0 },
+        visible: {
+            x: 0,
+            opacity: 1,
+            transition: { duration: 0.5, ease: "easeOut" }
         }
     };
-
-    // Scroll Observers
-    const trendingRef = useInfiniteScroll(loadMoreTrending, hasMoreTrending);
-    const popularRef = useInfiniteScroll(loadMorePopular, hasMorePopular);
-    const tvRef = useInfiniteScroll(loadMoreTv, hasMoreTv);
-
-    const renderSkeletons = () => (
-        [...Array(6)].map((_, i) => <MovieCardSkeleton key={i} />)
-    );
-
-    const HorizontalLoader = () => (
-        <div className="shrink-0 w-[200px] sm:w-[220px] lg:w-[240px] aspect-3/4 flex items-center justify-center">
-            <div className="w-8 h-8 border-4 border-brand-red/30 border-t-brand-red rounded-full animate-spin"></div>
-        </div>
-    );
 
     return (
-        <div className="min-h-screen bg-[#110C0C] text-white pb-20 overflow-hidden">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="min-h-screen bg-[#110C0C] text-white pb-20 overflow-hidden"
+        >
             {initialLoading && !heroMovie && <HeroSkeleton />}
 
             {!initialLoading && heroMovie && (
                 <div className="relative w-full h-[85vh] md:h-[95vh]">
                     <div className="absolute inset-0">
-                        <img
+                        <motion.img
+                            initial={{ scale: 1.1, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 1.5, ease: "easeOut" }}
                             src={heroMovie.backdrop || heroMovie.poster}
                             alt={heroMovie.title}
                             className="w-full h-full object-cover"
@@ -167,33 +179,44 @@ const Home = () => {
                     </div>
 
                     <div className="relative h-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col justify-center pt-20 cursor-default">
-                        <div className="max-w-2xl space-y-6">
-                            <div className="flex items-center gap-3">
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="max-w-2xl space-y-6"
+                        >
+                            <motion.div variants={itemVariants} className="flex items-center gap-3">
                                 <span className="bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-[4px] bg-opacity-90">TRENDING #1</span>
                                 <span className="text-gray-300 font-medium text-sm drop-shadow-md">
                                     {heroMovie.media_type === 'tv' ? 'TV Series' : 'Movie'} • {heroMovie.year}
                                 </span>
-                            </div>
+                            </motion.div>
 
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-white drop-shadow-2xl uppercase">
+                            <motion.h1
+                                variants={itemVariants}
+                                className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-white drop-shadow-2xl uppercase"
+                            >
                                 {heroMovie.title}
-                            </h1>
+                            </motion.h1>
 
-                            <p className="text-lg md:text-xl text-gray-300 font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3">
+                            <motion.p
+                                variants={itemVariants}
+                                className="text-lg md:text-xl text-gray-300 font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3"
+                            >
                                 {heroMovie.overview}
-                            </p>
+                            </motion.p>
 
-                            <div className="flex items-center gap-4 pt-4">
-                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-brand-red hover:bg-[#F40612] text-white px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-[0_4px_14px_rgba(229,9,20,0.3)] cursor-pointer">
+                            <motion.div variants={itemVariants} className="flex items-center gap-4 pt-4">
+                                <Link to={`/movie/${heroMovie.id}`} className="group/btn flex items-center gap-2 bg-brand-red hover:bg-[#F40612] text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-[0_4px_14px_rgba(229,9,20,0.3)] cursor-pointer">
                                     <Play className="w-5 h-5 fill-current" />
                                     Play Trailer
                                 </Link>
-                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer">
+                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 px-8 py-3.5 rounded-full font-bold transition-all cursor-pointer">
                                     <Info className="w-5 h-5" />
                                     More Info
                                 </Link>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     </div>
                 </div>
             )}
@@ -203,7 +226,13 @@ const Home = () => {
                 {/* Our Latest Additions (Admin Movies) */}
                 {ourMovies.length > 0 && (
                     <section>
-                        <div className="flex items-center justify-between mb-2 mt-30">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, margin: "-100px" }}
+                            variants={headingVariants}
+                            className="flex items-center justify-between mb-2 mt-30"
+                        >
                             <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
                                 <TrendingUp className="w-6 h-6 text-brand-red" />
                                 Our Latest Additions
@@ -211,7 +240,7 @@ const Home = () => {
                             <Link to="/movies" className="text-brand-red hover:text-[#F40612] font-semibold text-sm transition-colors border-2 border-transparent hover:border-brand-red/20 px-3 py-1 rounded-full pointer-events-auto">
                                 View All
                             </Link>
-                        </div>
+                        </motion.div>
                         <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                             {initialLoading ? renderSkeletons() : ourMovies.map((movie, index) => (
                                 <Link to={`/movie/${movie.id}`} key={`local-${movie.id}-${index}`} className="snap-start block shrink-0">
@@ -224,7 +253,13 @@ const Home = () => {
 
                 {/* Trending Now */}
                 <section>
-                    <div className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6" : "flex items-center justify-between mb-2 mt-30"}>
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={headingVariants}
+                        className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6" : "flex items-center justify-between mb-2 mt-30"}
+                    >
                         <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
                             <TrendingUp className="w-6 h-6 text-brand-red" />
                             Trending Now
@@ -232,7 +267,7 @@ const Home = () => {
                         <Link to="/movies" className="text-brand-red hover:text-[#F40612] font-semibold text-sm transition-colors border-2 border-transparent hover:border-brand-red/20 px-3 py-1 rounded-full pointer-events-auto">
                             View All
                         </Link>
-                    </div>
+                    </motion.div>
                     <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                         {initialLoading ? renderSkeletons() : trendingMovies.map((movie, index) => (
                             <Link to={`/movie/${movie.id}`} key={`${movie.id}-${index}`} className="snap-start block shrink-0">
@@ -249,9 +284,15 @@ const Home = () => {
 
                 {/* Popular Movies */}
                 <section>
-                    <div className="flex items-center justify-between mb-6">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={headingVariants}
+                        className="flex items-center justify-between mb-6"
+                    >
                         <h2 className="text-2xl md:text-3xl font-bold text-white">Popular Movies</h2>
-                    </div>
+                    </motion.div>
                     <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                         {initialLoading ? renderSkeletons() : popularMovies.map((movie, index) => (
                             <Link to={`/movie/${movie.id}`} key={`${movie.id}-${index}`} className="snap-start block shrink-0">
@@ -268,9 +309,15 @@ const Home = () => {
 
                 {/* Top Rated TV Shows */}
                 <section>
-                    <div className="flex items-center justify-between mb-6">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={headingVariants}
+                        className="flex items-center justify-between mb-6"
+                    >
                         <h2 className="text-2xl md:text-3xl font-bold text-white">Top Rated TV Shows</h2>
-                    </div>
+                    </motion.div>
                     <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                         {initialLoading ? renderSkeletons() : topRatedTvShows.map((show, index) => (
                             <Link to={`/movie/${show.id}`} key={`${show.id}-${index}`} className="snap-start block shrink-0">
@@ -286,7 +333,7 @@ const Home = () => {
                 </section>
 
             </div>
-        </div>
+        </motion.div>
     );
 };
 

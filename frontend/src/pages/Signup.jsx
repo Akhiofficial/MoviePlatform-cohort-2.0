@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Clapperboard, User, Mail, Lock, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const Signup = () => {
     const [fullname, setFullname] = useState('');
@@ -45,14 +46,22 @@ const Signup = () => {
     };
 
     return (
-        <div className="relative min-h-screen bg-bg-dark flex flex-col items-center justify-center overflow-hidden text-white font-sans selection:bg-brand-red selection:text-white">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="relative min-h-screen bg-bg-dark flex flex-col items-center justify-center overflow-hidden text-white font-sans selection:bg-brand-red selection:text-white"
+        >
 
             {/* Background Image - Cinema Exterior */}
             <div className="absolute inset-0 z-0">
-                <img
+                <motion.img
+                    initial={{ scale: 1.1, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 0.3 }}
+                    transition={{ duration: 1.5 }}
                     src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?q=80&w=2070&auto=format&fit=crop"
                     alt="Cinema background"
-                    className="w-full h-full object-cover opacity-30"
+                    className="w-full h-full object-cover"
                 />
                 {/* Deep red-tinted dark overlay */}
                 <div className="absolute inset-0 bg-linear-to-b from-[#140505]/80 via-[#1A0A0A]/90 to-[#141010]"></div>
@@ -64,9 +73,13 @@ const Signup = () => {
                 {/* Top Left Logo */}
                 <div className="absolute top-6 left-6 md:top-8 md:left-12 flex items-center gap-2 group cursor-pointer z-50">
                     <Link to="/" className="flex items-center gap-2">
-                        <div className="bg-brand-red p-1.5 rounded-lg">
+                        <motion.div
+                            whileHover={{ scale: 1.1, rotate: -5 }}
+                            whileTap={{ scale: 0.9 }}
+                            className="bg-brand-red p-1.5 rounded-lg"
+                        >
                             <Clapperboard className="w-6 h-6 text-white" />
-                        </div>
+                        </motion.div>
                         <span className="text-2xl font-black tracking-tighter text-white">
                             FLIX
                         </span>
@@ -74,7 +87,12 @@ const Signup = () => {
                 </div>
 
                 {/* Signup Form Container */}
-                <div className="w-full max-w-[480px] rounded-[24px] overflow-hidden shadow-2xl border border-white/5 relative z-20 flex flex-col">
+                <motion.div
+                    initial={{ y: 30, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                    className="w-full max-w-[480px] rounded-[24px] overflow-hidden shadow-2xl border border-white/5 relative z-20 flex flex-col"
+                >
 
                     {/* Top Red Section with Dot Pattern */}
                     <div className="bg-brand-red px-8 py-10 relative overflow-hidden">
@@ -82,8 +100,22 @@ const Signup = () => {
                         <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, white 1.5px, transparent 1.5px)', backgroundSize: '16px 16px' }}></div>
 
                         <div className="relative z-10 text-center">
-                            <h1 className="text-3xl font-bold mb-2">Join the Club</h1>
-                            <p className="text-red-100 text-sm font-medium">Start your 30-day free trial today.</p>
+                            <motion.h1
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.5 }}
+                                className="text-3xl font-bold mb-2"
+                            >
+                                Join the Club
+                            </motion.h1>
+                            <motion.p
+                                initial={{ y: 10, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ delay: 0.6 }}
+                                className="text-red-100 text-sm font-medium"
+                            >
+                                Start your 30-day free trial today.
+                            </motion.p>
                         </div>
                     </div>
 
@@ -92,9 +124,13 @@ const Signup = () => {
                         <form className="flex flex-col gap-5 w-full" onSubmit={handleSubmit}>
 
                             {error && (
-                                <div className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-md text-sm">
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    className="bg-red-500/20 border border-red-500 text-red-100 px-4 py-3 rounded-md text-sm"
+                                >
                                     {error}
-                                </div>
+                                </motion.div>
                             )}
 
                             {/* Full Name Input */}
@@ -189,7 +225,11 @@ const Signup = () => {
 
                             {/* Social Buttons */}
                             <div className="flex gap-4">
-                                <button className="flex-1 flex items-center justify-center gap-2 bg-[#2B2525] hover:bg-[#362E2E] border border-white/5 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm">
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#2B2525] hover:bg-[#362E2E] border border-white/5 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm cursor-pointer"
+                                >
                                     {/* Simple Google SVG Icon */}
                                     <svg className="w-4 h-4" viewBox="0 0 24 24">
                                         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -198,20 +238,24 @@ const Signup = () => {
                                         <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
                                     </svg>
                                     Google
-                                </button>
-                                <button className="flex-1 flex items-center justify-center gap-2 bg-[#2B2525] hover:bg-[#362E2E] border border-white/5 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm">
+                                </motion.button>
+                                <motion.button
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-[#2B2525] hover:bg-[#362E2E] border border-white/5 text-white font-semibold py-3.5 rounded-xl transition-colors text-sm cursor-pointer"
+                                >
                                     {/* Simple Apple SVG Icon */}
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-apple" viewBox="0 0 16 16">
                                         <path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282" />
                                         <path d="M11.182.008C11.148-.03 9.923.023 8.857 1.18c-1.066 1.156-.902 2.482-.878 2.516s1.52.087 2.475-1.258.762-2.391.728-2.43m3.314 11.733c-.048-.096-2.325-1.234-2.113-3.422s1.675-2.789 1.698-2.854-.597-.79-1.254-1.157a3.7 3.7 0 0 0-1.563-.434c-.108-.003-.483-.095-1.254.116-.508.139-1.653.589-1.968.607-.316.018-1.256-.522-2.267-.665-.647-.125-1.333.131-1.824.328-.49.196-1.422.754-2.074 2.237-.652 1.482-.311 3.83-.067 4.56s.625 1.924 1.273 2.796c.576.984 1.34 1.667 1.659 1.899s1.219.386 1.843.067c.502-.308 1.408-.485 1.766-.472.357.013 1.061.154 1.782.539.571.197 1.111.115 1.652-.105.541-.221 1.324-1.059 2.238-2.758q.52-1.185.473-1.282" />
                                     </svg>
                                     Apple
-                                </button>
+                                </motion.button>
                             </div>
 
                         </form>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* Bottom Login Link */}
                 <div className="text-gray-400 mt-8 text-[15px] font-medium z-20">
@@ -232,8 +276,9 @@ const Signup = () => {
                 </div>
             </div>
 
-        </div>
+        </motion.div>
     );
 };
 
 export default Signup;
+

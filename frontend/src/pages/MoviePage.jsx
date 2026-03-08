@@ -6,6 +6,7 @@ import { GridCardSkeleton } from '../components/Loader';
 import { useUserActivity } from '../context/UserActivityContext';
 import { useAuth } from '../context/AuthContext';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import { motion } from 'framer-motion';
 
 const FavoriteMovieCard = ({ movie }) => {
     const { isFavorite, toggleFavorite } = useUserActivity();
@@ -28,7 +29,12 @@ const FavoriteMovieCard = ({ movie }) => {
     };
 
     return (
-        <div onClick={handleCardClick} className="flex flex-col gap-2 group cursor-pointer w-full">
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleCardClick}
+            className="flex flex-col gap-2 group cursor-pointer w-full"
+        >
             {/* Poster Image Container */}
             <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-[#222]">
                 {movie.poster ? (
@@ -67,7 +73,7 @@ const FavoriteMovieCard = ({ movie }) => {
                     <span>{movie.year}</span>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -78,6 +84,7 @@ const MoviePage = () => {
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true); // New state for initial loading
 
     const loadMoreMovies = () => {
         if (!loading && hasMore) {
@@ -123,6 +130,7 @@ const MoviePage = () => {
                 console.error("Error fetching movies:", error);
             } finally {
                 setLoading(false);
+                if (page === 1) setInitialLoading(false); // Set initial loading to false after first fetch
             }
         };
 
@@ -135,57 +143,77 @@ const MoviePage = () => {
         setPage(1);
         setMovies([]);
         setHasMore(true);
+        setInitialLoading(true); // Reset initial loading when genre changes
     };
 
-    const handleShuffle = () => {
-        if (movies.length > 0) {
-            const shuffled = [...movies].sort(() => Math.random() - 0.5);
-            setMovies(shuffled);
-        }
-    };
+    // Removed handleShuffle as it's no longer used in the new UI
 
     return (
-        <div className="min-h-screen bg-[#110C0C] text-white pt-[100px] pb-24">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="min-h-screen bg-[#110C0C] text-white pt-32 pb-24"
+        >
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
 
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
-                    <div>
-                        <h1 className="text-4xl md:text-[44px] font-bold mb-3 tracking-tight text-white">
-                            Movies
-                        </h1>
-                        <p className="text-[#AAAAAA] text-[16px] font-medium max-w-lg leading-relaxed">
-                            Explore our vast collection of cinematic masterpieces. {movies.length} movies loaded.
-                        </p>
-                    </div>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/10 pb-8">
+                    <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">MOVIES</h1>
+                        <p className="text-gray-400 font-medium">Explore the world of cinema with our curated collection.</p>
+                    </motion.div>
 
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={handleShuffle}
-                            className="flex items-center gap-2 bg-[#F40612] hover:bg-red-700 text-white px-6 py-2.5 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 text-sm cursor-pointer"
-                        >
-                            <Shuffle className="w-4 h-4" />
-                            Shuffle Collections
-                        </button>
-                    </div>
+                    <motion.div
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-full cursor-default"
+                    >
+                        <div className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></div>
+                        <span className="text-sm font-bold text-gray-300 uppercase tracking-wider">
+                            {initialLoading ? 'Loading Catalog...' : `${movies.length} TITLES AVAILABLE`}
+                        </span>
+                    </motion.div>
                 </div>
 
-                {/* Genre Bar */}
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 -mx-6 px-6 lg:-mx-12 lg:px-12">
-                    <button
+                {/* Genre Filter */}
+                <div className="flex flex-wrap gap-3 mb-12">
+                    <motion.button
+                        key="all-genres"
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => handleGenreSelect('')}
-                        className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === '' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                        className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all cursor-pointer ${selectedGenre === ''
+                            ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
+                            : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
+                            }`}
                     >
                         All
-                    </button>
-                    {genres.map((genre) => (
-                        <button
+                    </motion.button>
+                    {genres.map((genre, index) => (
+                        <motion.button
                             key={genre.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.1 + (index + 1) * 0.05 }} // Adjust delay for "All" button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => handleGenreSelect(genre.id)}
-                            className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all cursor-pointer ${selectedGenre === genre.id
+                                ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
+                                : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
+                                }`}
                         >
                             {genre.name}
-                        </button>
+                        </motion.button>
                     ))}
                 </div>
 
@@ -201,23 +229,21 @@ const MoviePage = () => {
                     ))}
                 </div>
 
-                {/* Infinite Scroll trigger */}
-                {hasMore && (
-                    <div ref={loaderRef} className="w-full h-32 flex items-center justify-center mt-8">
-                        {loading && page > 1 && (
-                            <div className="w-8 h-8 border-4 border-[#F40612]/30 border-t-[#F40612] rounded-full animate-spin"></div>
-                        )}
+                {/* Loading State for "Load More" */}
+                {loading && page > 1 && (
+                    <div className="flex justify-center mt-12 py-10">
+                        <div className="w-10 h-10 border-4 border-brand-red/20 border-t-brand-red rounded-full animate-spin"></div>
                     </div>
                 )}
 
-                {!hasMore && movies.length > 0 && (
-                    <div className="w-full text-center py-12 text-gray-500 font-medium">
-                        You've reached the end of the collection.
+                {/* Infinite Scroll Trigger */}
+                {hasMore && !initialLoading && (
+                    <div ref={loaderRef} className="h-20 w-full flex items-center justify-center mt-4">
+                        {!loading && <div className="w-2 h-2 rounded-full bg-brand-red/40 animate-bounce"></div>}
                     </div>
                 )}
-
             </div>
-        </div>
+        </motion.div>
     );
 };
 

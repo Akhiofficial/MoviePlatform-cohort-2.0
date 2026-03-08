@@ -2,11 +2,16 @@ import React from 'react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminTopbar from '../components/AdminTopbar';
 import DashboardOverview from '../components/DashboardOverview';
+import { motion } from 'framer-motion';
 
 const Admin = () => {
     return (
-        <div className="flex bg-[#161111] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white">
-
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex bg-[#161111] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+        >
             {/* Sidebar */}
             <AdminSidebar />
 
@@ -20,7 +25,7 @@ const Admin = () => {
                 <DashboardOverview />
 
             </main>
-        </div>
+        </motion.div>
     );
 };
 

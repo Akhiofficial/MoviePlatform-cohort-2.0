@@ -4,6 +4,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import AdminTopbar from '../components/AdminTopbar';
 import { api } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const AdminAddMovie = () => {
     const navigate = useNavigate();
@@ -38,7 +39,12 @@ const AdminAddMovie = () => {
     };
 
     return (
-        <div className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+        >
             <AdminSidebar />
             <main className="flex-1 flex flex-col h-screen overflow-y-auto w-full bg-[#110C0C]">
                 <AdminTopbar />
@@ -119,7 +125,7 @@ const AdminAddMovie = () => {
                     </section>
                 </div>
             </main>
-        </div>
+        </motion.div>
     );
 };
 

@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Filter, Plus, Star, Shuffle, SortAsc, SortDesc } from 'lucide-react';
+import { Heart, Trash2, SlidersHorizontal, Play, Plus, Shuffle, Star, SortAsc, SortDesc, Filter } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useUserActivity } from '../context/UserActivityContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
-import { useNavigate } from 'react-router-dom';
 
 const FavoriteCard = ({ movie }) => {
   const navigate = useNavigate();
 
   return (
-    <div
+    <motion.div
       onClick={() => navigate(`/movie/${movie.movieId}`)}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: 1.05 }}
+      transition={{ duration: 0.3 }}
       className="flex flex-col gap-2 group cursor-pointer w-full"
     >
       {/* Poster Image Container */}
-      <div className="relative aspect-3/4 w-full rounded-[24px] overflow-hidden shadow-lg border border-white/5 transition-transform duration-300 group-hover:scale-[1.03] group-hover:shadow-2xl group-hover:border-white/20 bg-white/5">
-        <img
+      <div className="relative aspect-3/4 w-full rounded-[24px] overflow-hidden shadow-lg border border-white/5 group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-300 bg-white/5">
+        <motion.img
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
           src={movie.poster || movie.backdrop}
           alt={movie.title}
           className="w-full h-full object-cover"
@@ -36,19 +44,23 @@ const FavoriteCard = ({ movie }) => {
           <span>{movie.year}</span>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
 const AddNewCard = () => (
-  <div className="flex flex-col gap-2 group cursor-pointer w-full h-full min-h-[300px]">
+  <motion.div
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    className="flex flex-col gap-2 group cursor-pointer w-full h-full min-h-[300px]"
+  >
     <div className="relative w-full h-full rounded-[24px] border-2 border-dashed border-white/10 hover:border-brand-red/50 hover:bg-white/5 transition-all duration-300 flex flex-col items-center justify-center gap-4 aspect-3/4">
       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-brand-red transition-colors group-hover:scale-110 duration-300">
         <Plus className="w-6 h-6 text-white" />
       </div>
       <span className="text-gray-400 font-bold group-hover:text-white transition-colors">Add New</span>
     </div>
-  </div>
+  </motion.div>
 );
 
 const Favorites = () => {
@@ -79,7 +91,12 @@ const Favorites = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#141010] text-white pt-32 pb-24">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-[#141010] text-white pt-32 pb-24"
+    >
       <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
 
         {/* Breadcrumb Info */}
@@ -89,30 +106,38 @@ const Favorites = () => {
 
         {/* Header Section */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-          <div>
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+          >
             <h1 className="text-4xl md:text-[48px] font-bold mb-3 tracking-tight">
               My Favorites
             </h1>
             <p className="text-gray-400 text-[17px] font-medium max-w-lg leading-relaxed">
               Your curated collection of cinematic masterpieces. {favorites.length} items saved.
             </p>
-          </div>
+          </motion.div>
 
           <div className="flex items-center gap-4">
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleShuffle}
-              className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition-transform hover:scale-105 active:scale-95 shadow-lg shadow-brand-red/20 text-sm"
+              className="flex items-center gap-2 bg-brand-red hover:bg-red-700 text-white px-6 py-3 rounded-full font-bold transition-transform shadow-lg shadow-brand-red/20 text-sm cursor-pointer"
             >
               <Shuffle className="w-4 h-4" />
               Shuffle Collections
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleSort}
-              className={`flex items-center justify-center w-12 h-12 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors ${sortOrder !== 'none' ? 'text-brand-red border-brand-red/50' : 'text-white'}`}
+              className={`flex items-center justify-center w-12 h-12 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors cursor-pointer ${sortOrder !== 'none' ? 'text-brand-red border-brand-red/50' : 'text-white'}`}
               title={sortOrder === 'asc' ? 'Sort Z-A' : 'Sort A-Z'}
             >
               {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : sortOrder === 'desc' ? <SortDesc className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
-            </button>
+            </motion.button>
           </div>
         </div>
 
@@ -126,7 +151,12 @@ const Favorites = () => {
         </div>
 
         {/* Build a Collection Banner */}
-        <div className="bg-[#1C1717] rounded-[24px] border border-white/5 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="bg-[#1C1717] rounded-[24px] border border-white/5 p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden"
+        >
           {/* Background Glow */}
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-red/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
@@ -138,17 +168,25 @@ const Favorites = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10 w-full md:w-auto">
-            <button className="w-full sm:w-auto bg-transparent border-2 border-white/10 hover:border-white/30 hover:bg-white/5 text-white px-8 py-3.5 rounded-full font-bold transition-all text-sm">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto bg-transparent border-2 border-white/10 hover:border-white/30 hover:bg-white/5 text-white px-8 py-3.5 rounded-full font-bold transition-all text-sm cursor-pointer"
+            >
               Create Playlist
-            </button>
-            <button className="w-full sm:w-auto bg-brand-red hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-brand-red/20 text-sm">
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full sm:w-auto bg-brand-red hover:bg-red-700 text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-lg shadow-brand-red/20 text-sm cursor-pointer"
+            >
               Share Favorites
-            </button>
+            </motion.button>
           </div>
-        </div>
+        </motion.div>
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

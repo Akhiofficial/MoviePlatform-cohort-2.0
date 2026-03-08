@@ -3,6 +3,7 @@ import { ChevronDown, Calendar, Filter, Download, Edit2, Trash2 } from 'lucide-r
 import AdminSidebar from '../components/AdminSidebar';
 import AdminTopbar from '../components/AdminTopbar';
 import { api } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const AdminManageMovies = () => {
     const [movies, setMovies] = useState([]);
@@ -82,7 +83,12 @@ const AdminManageMovies = () => {
     };
 
     return (
-        <div className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+        >
 
             {/* Sidebar */}
             <AdminSidebar />
@@ -95,8 +101,6 @@ const AdminManageMovies = () => {
 
                 {/* Dashboard Scrollable Body */}
                 <div className="p-8 pb-20 max-w-[1200px] w-full mx-auto space-y-10">
-
-
 
                     {/* Manage Movies Table Area */}
                     <section className="bg-[#1A1414] border border-[#2A1E1E] rounded-[24px] p-8 md:p-10 shadow-xl overflow-x-auto">
@@ -271,7 +275,7 @@ const AdminManageMovies = () => {
                     </div>
                 </div>
             )}
-        </div>
+        </motion.div>
     );
 };
 

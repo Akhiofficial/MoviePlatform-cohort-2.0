@@ -1,37 +1,84 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Heart, Star, Calendar, Clock, User } from 'lucide-react';
-import ReactPlayer from 'react-player';
+import {
+  Play,
+  Info,
+  Plus,
+  Check,
+  Star,
+  Clock,
+  Calendar,
+  Globe,
+  ChevronLeft,
+  Share2,
+  Bookmark,
+  Award,
+  Video,
+  Users,
+  Film,
+  Heart,
+  User
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import MovieCard from '../components/MovieCard';
-import { HeroSkeleton } from '../components/Loader';
-import { useParams, Link } from 'react-router-dom';
+import { HeroSkeleton, MovieCardSkeleton } from '../components/Loader';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getMovieDetails, getSimilarMovies } from '../services/tmdb';
 import { useUserActivity } from '../context/UserActivityContext';
 import { useAuth, api } from '../context/AuthContext';
 
 const MovieDetails = () => {
   const { id } = useParams();
-  const { isFavorite, toggleFavorite, addToHistory, history } = useUserActivity();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const playerRef = useRef(null);
-  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(true);
-  const [movie, setMovie] = useState(null);
-  const [similarMovies, setSimilarMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [watchProgress, setWatchProgress] = useState({ currentTime: 0, duration: 0 });
-  const [lastSyncTime, setLastSyncTime] = useState(0);
+  const { isFavorite, toggleFavorite, addToHistory, history } = useUserActivity();
 
-  // We need to pass the ID properly to check if it's favorited. TMDB ID is technically a number, but useParams is a string. Check conversion later if needed.
+  const [movie, setMovie] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [initialStartTime, setInitialStartTime] = useState(0);
+  const spotlightRef = useRef(null);
+
   const isFav = movie ? isFavorite(movie.id) : false;
+
+  // Track estimated progress for iframe
+  useEffect(() => {
+    let interval;
+    if (isVideoPlaying && movie) {
+      const savedHistory = Array.isArray(history)
+        ? history.find(h => h.movieId?.toString() === movie.id?.toString())
+        : null;
+      const initialTime = savedHistory ? Math.floor(savedHistory.currentTime) : 0;
+      const startTime = Date.now();
+
+      // Ensure it shows up in history immediately with progress
+      addToHistory(movie, { currentTime: initialTime, duration: 180 });
+
+      interval = setInterval(() => {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const estimatedCurrentTime = Math.floor(initialTime + elapsed);
+
+        // Since we only play trailers in this section, we should measure progress
+        // against a standard trailer length (180s) so it's visible in History.
+        // Full movie runtime (e.g. 6600s) makes 30s of watching look invisible (0.5%).
+        const trailerDuration = 180;
+
+        // Sync to history every 15 seconds of playback
+        if (Math.floor(elapsed) > 0 && Math.floor(elapsed) % 15 === 0) {
+          addToHistory(movie, { currentTime: estimatedCurrentTime, duration: trailerDuration });
+        }
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isVideoPlaying, movie]);
 
   useEffect(() => {
     const fetchMovieData = async () => {
       setLoading(true);
       try {
-        const isLocal = isNaN(id) && id.length === 24; // MongoDB ObjectIds are 24-char hex strings
+        const isLocal = isNaN(id) && id.length === 24;
 
         if (isLocal) {
-          // Fetch from local backend
           const res = await api.get(`/movies/${id}`);
           const data = res.data.movie;
 
@@ -46,7 +93,7 @@ const MovieDetails = () => {
             id: data._id,
             media_type: data.category ? data.category.toLowerCase() : 'movie',
             title: data.title,
-            rating: 'N/A',
+            rating: data.rating,
             stars: '0.0',
             year: data.releaseDate ? new Date(data.releaseDate).getFullYear() : 'Unknown',
             duration: data.duration ? `${Math.floor(data.duration / 60)}h ${data.duration % 60}m` : 'N/A',
@@ -60,20 +107,18 @@ const MovieDetails = () => {
             cast: [],
             trailerKey: extractYoutubeId(data.trailer),
             trailerPreview: data.poster,
+            runtimeSeconds: data.duration ? data.duration * 60 : 0
           };
 
           setMovie(formattedMovie);
-          addToHistory(formattedMovie);
-          setSimilarMovies([]); // Empty or fetch generic similar local movies
+          setSimilarMovies([]);
         } else {
-          // Fetch from TMDB
           const [detailsRes, similarRes] = await Promise.all([
             getMovieDetails(id),
             getSimilarMovies(id)
           ]);
 
           const data = detailsRes.data;
-
           const trailerVideo = data.videos?.results?.find(vid => vid.site === 'YouTube' && vid.type === 'Trailer') ||
             data.videos?.results?.find(vid => vid.site === 'YouTube');
 
@@ -102,10 +147,10 @@ const MovieDetails = () => {
             })) || [],
             trailerKey: trailerVideo ? trailerVideo.key : null,
             trailerPreview: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=2094&auto=format&fit=crop',
+            runtimeSeconds: data.runtime ? data.runtime * 60 : 0
           };
 
           setMovie(formattedMovie);
-          addToHistory(formattedMovie);
 
           const similar = similarRes.data.results.map(item => ({
             id: item.id,
@@ -118,7 +163,7 @@ const MovieDetails = () => {
           setSimilarMovies(similar);
         }
       } catch (error) {
-        console.error("Error fetching movie details:", error);
+        console.error("Error fetching movie data:", error);
       } finally {
         setLoading(false);
       }
@@ -148,14 +193,22 @@ const MovieDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#110C0C] text-white">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-[#110C0C] text-white"
+    >
       {/* Hero Backdrop Setup */}
       <div className="relative w-full h-[60vh] md:h-[99vh]">
         <div className="absolute inset-0">
-          <img
+          <motion.img
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 0.6, scale: 1 }}
+            transition={{ duration: 1.2 }}
             src={movie.backdrop}
             alt="Backdrop"
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover"
             style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)' }}
           />
           <div className="absolute inset-0 bg-linear-to-t from-[#110C0C] via-transparent to-transparent"></div>
@@ -163,25 +216,45 @@ const MovieDetails = () => {
 
         <div className="relative h-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-end pb-12 gap-8 md:gap-12 pt-32 cursor-default">
           {/* Poster */}
-          <div className="w-48 md:w-64 lg:w-72 shrink-0 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl relative z-10 hidden md:block aspect-2/3">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="w-48 md:w-64 lg:w-72 shrink-0 rounded-2xl overflow-hidden border-4 border-white/10 shadow-2xl relative z-10 hidden md:block aspect-2/3"
+          >
             <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
-          </div>
+          </motion.div>
 
           {/* Meta Info */}
           <div className="flex-1 space-y-4 md:space-y-6 max-w-3xl relative z-10 w-full mb-4">
-            <div className="flex items-center gap-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="flex items-center gap-3"
+            >
               <span className="bg-brand-red text-white text-xs font-bold px-2.5 py-1 rounded-[4px] bg-opacity-90 tracking-wide uppercase">Featured</span>
               <div className="flex items-center gap-1.5 text-yellow-500 bg-black/40 px-2 py-1 rounded-[4px] backdrop-blur-sm border border-white/5">
                 <Star className="w-4 h-4 fill-current" />
                 <span className="text-gray-200 text-sm font-semibold">{movie.stars}</span>
               </div>
-            </div>
+            </motion.div>
 
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none drop-shadow-md">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="text-4xl md:text-6xl lg:text-7xl font-black tracking-tight leading-none drop-shadow-md"
+            >
               {movie.title}
-            </h1>
+            </motion.h1>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm md:text-base text-gray-300 font-medium pb-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="flex flex-wrap items-center gap-4 text-sm md:text-base text-gray-300 font-medium pb-2"
+            >
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-brand-red" />
                 <span>{movie.year}</span>
@@ -194,42 +267,59 @@ const MovieDetails = () => {
                 <User className="w-4 h-4 text-brand-red" />
                 <span>{movie.director}</span>
               </div>
-            </div>
+            </motion.div>
 
-            {/* Genre Pills */}
-            <div className="flex flex-wrap gap-2">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7, duration: 0.5 }}
+              className="flex flex-wrap gap-2"
+            >
               {movie.genres.map(genre => (
                 <span key={genre} className="px-4 py-1.5 rounded-full border border-brand-red/50 text-brand-red text-xs font-bold uppercase tracking-wide bg-brand-red/10">
                   {genre}
                 </span>
               ))}
-            </div>
+            </motion.div>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
-              <button
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8, duration: 0.5 }}
+              className="flex flex-col sm:flex-row items-center gap-4 pt-4"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   if (movie.trailerKey) {
+                    const savedHistory = Array.isArray(history)
+                      ? history.find(h => h.movieId?.toString() === movie.id?.toString())
+                      : null;
+                    setInitialStartTime(savedHistory ? Math.floor(savedHistory.currentTime) : 0);
                     setIsVideoPlaying(true);
-                    addToHistory(movie);
+                    spotlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                   }
                 }}
-                className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 shadow-xl w-full sm:w-auto ${movie.trailerKey ? 'bg-brand-red hover:bg-[#F40612] text-white shadow-brand-red/20 cursor-pointer' : 'bg-gray-600 text-gray-300 cursor-not-allowed'}`}
+                className={`flex items-center justify-center gap-2 px-8 py-3.5 rounded-full font-bold transition-all shadow-xl w-full sm:w-auto ${movie.trailerKey ? 'bg-brand-red hover:bg-[#F40612] text-white shadow-brand-red/20 cursor-pointer' : 'bg-gray-600 text-gray-300 cursor-not-allowed'}`}
               >
                 <Play className="w-5 h-5 fill-current" />
                 Watch Trailer
-              </button>
-              <button
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   if (!user) return;
                   toggleFavorite(movie)
                 }}
-                className={`flex items-center justify-center gap-2 border border-white/10 backdrop-blur-md px-8 py-3.5 rounded-full font-bold transition-all hover:scale-105 active:scale-95 w-full sm:w-auto cursor-pointer ${isFav ? 'bg-brand-red/20 text-brand-red hover:bg-brand-red/30 border-brand-red/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                className={`flex items-center justify-center gap-2 border border-white/10 backdrop-blur-md px-8 py-3.5 rounded-full font-bold transition-all w-full sm:w-auto cursor-pointer ${isFav ? 'bg-brand-red/20 text-brand-red hover:bg-brand-red/30 border-brand-red/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
               >
                 <Heart className={`w-5 h-5 ${isFav ? 'fill-brand-red' : ''}`} />
                 {isFav ? 'Added to Favorites' : 'Add to Favorites'}
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </div>
         </div>
       </div>
@@ -291,16 +381,18 @@ const MovieDetails = () => {
 
         {/* Video Spotlight */}
         {movie.trailerKey && (
-          <div className="space-y-6">
+          <div className="space-y-6" ref={spotlightRef}>
             <h3 className="text-2xl font-bold">Video Spotlight</h3>
             <div className="relative w-full aspect-video rounded-[24px] overflow-hidden group border border-white/10 shadow-2xl bg-black">
               {!isVideoPlaying ? (
                 <div
                   className="w-full h-full cursor-pointer relative"
                   onClick={() => {
+                    const savedHistory = Array.isArray(history)
+                      ? history.find(h => h.movieId?.toString() === movie.id?.toString())
+                      : null;
+                    setInitialStartTime(savedHistory ? Math.floor(savedHistory.currentTime) : 0);
                     setIsVideoPlaying(true);
-                    setIsPlaying(true);
-                    addToHistory(movie);
                   }}
                 >
                   <img src={movie.trailerPreview} alt="Trailer preview" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -315,45 +407,15 @@ const MovieDetails = () => {
                 </div>
               ) : (
                 <div className="w-full h-full relative">
-                  <ReactPlayer
-                    ref={playerRef}
-                    src={`https://www.youtube.com/watch?v=${movie.trailerKey}`}
-                    width="100%"
-                    height="100%"
-                    className="absolute top-0 left-0"
-                    playing={isPlaying}
-                    controls={true}
-                    onPlay={() => setIsPlaying(true)}
-                    onPause={() => setIsPlaying(false)}
-                    onReady={() => {
-                      try {
-                        const savedHistory = history.find(h => h.movieId === (movie.id?.toString() || id));
-                        if (savedHistory && savedHistory.currentTime > 0 && playerRef.current) {
-                          playerRef.current.seekTo(savedHistory.currentTime, 'seconds');
-                        }
-                      } catch (err) {
-                        console.error("Seeking error:", err);
-                      }
-                    }}
-                    onError={(e) => console.error("ReactPlayer Error:", e)}
-                    onTimeUpdate={(e) => {
-                      const currentTime = Math.floor(e.target.currentTime);
-                      setWatchProgress(prev => ({ ...prev, currentTime }));
-
-                      if (currentTime - lastSyncTime >= 10) {
-                        addToHistory(movie, { currentTime, duration: watchProgress.duration });
-                        setLastSyncTime(currentTime);
-                      }
-                    }}
-                    onDurationChange={(e) => {
-                      setWatchProgress(prev => ({ ...prev, duration: Math.floor(e.target.duration) }));
-                    }}
-                    config={{
-                      youtube: {
-                        playerVars: { showinfo: 0, rel: 0, modestbranding: 1 }
-                      }
-                    }}
-                  />
+                  <iframe
+                    key={`${movie.id}`}
+                    className="absolute top-0 left-0 w-full h-full"
+                    src={`https://www.youtube.com/embed/${movie.trailerKey}?autoplay=1&start=${initialStartTime}&rel=0&modestbranding=1`}
+                    title="Movie Trailer"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  ></iframe>
                 </div>
               )}
             </div>
@@ -377,7 +439,7 @@ const MovieDetails = () => {
         )}
 
       </div>
-    </div>
+    </motion.div>
   );
 };
 

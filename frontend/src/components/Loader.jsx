@@ -63,6 +63,14 @@ export const MovieCardSkeleton = () => (
     </div>
 );
 
+// Loader for horizontal trending/popular lists
+export const HorizontalLoader = () => (
+    <div className="flex gap-6 animate-pulse px-2">
+        <div className="w-[220px] sm:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
+        <div className="w-[220px] sm:w-[260px] aspect-2/3 bg-[#1A1515] rounded-2xl shrink-0"></div>
+    </div>
+);
+
 // Skeleton for Grid Layouts (MoviePage, TvShowPage, Search, Favorites)
 // aspect-3/4, w-full
 export const GridCardSkeleton = () => (

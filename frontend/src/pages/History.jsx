@@ -2,12 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Play, Filter, Clock, Shuffle, SortAsc, SortDesc } from 'lucide-react';
 import { useUserActivity } from '../context/UserActivityContext';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const HistoryCard = ({ movie }) => {
     const navigate = useNavigate();
+    // Force at least 15% width if watched at all, to ensure visibility on small cards
+    const progressPercent = movie.currentTime && (movie.duration || 180)
+        ? Math.max(15, Math.min((movie.currentTime / (movie.duration || 180)) * 100, 100))
+        : 0;
 
     return (
-        <div
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ duration: 0.3 }}
             onClick={() => navigate(`/movie/${movie.movieId}`)}
             className="flex flex-col gap-2 group cursor-pointer w-full"
         >
@@ -18,12 +28,12 @@ const HistoryCard = ({ movie }) => {
                     className="w-full h-full object-cover"
                 />
 
-                {/* Progress Bar (YouTube Style) */}
-                {movie.currentTime > 0 && movie.duration > 0 && (
-                    <div className="absolute bottom-0 left-0 w-full h-1 bg-white/20">
+                {/* Ultra Prominent Progress Bar (Netflix Style) */}
+                {movie.currentTime > 0 && (
+                    <div className="absolute bottom-2 left-2 right-2 h-2.5 bg-white/10 rounded-full overflow-hidden z-40 backdrop-blur-sm border border-white/5">
                         <div
-                            className="h-full bg-brand-red shadow-[0_0_8px_rgba(229,9,20,0.6)]"
-                            style={{ width: `${Math.min((movie.currentTime / movie.duration) * 100, 100)}%` }}
+                            className="h-full bg-brand-red shadow-[0_0_15px_rgba(229,9,20,1)] transition-all duration-500"
+                            style={{ width: `${progressPercent}%` }}
                         ></div>
                     </div>
                 )}
@@ -40,7 +50,7 @@ const HistoryCard = ({ movie }) => {
                     <span>Watched Recently</span>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -72,7 +82,12 @@ const History = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#141010] text-white pt-32 pb-24">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="min-h-screen bg-[#141010] text-white pt-32 pb-24"
+        >
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
                 <div className="text-brand-red text-xs font-bold tracking-widest mb-4 uppercase">
                     ACTIVITY <span className="text-gray-600 mx-2">{'>'}</span> WATCH HISTORY
@@ -120,7 +135,7 @@ const History = () => {
                     </div>
                 )}
             </div>
-        </div>
+        </motion.div>
     );
 };
 

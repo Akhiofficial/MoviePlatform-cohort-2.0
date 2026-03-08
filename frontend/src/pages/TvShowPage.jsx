@@ -6,6 +6,7 @@ import { GridCardSkeleton } from '../components/Loader';
 import { useUserActivity } from '../context/UserActivityContext';
 import { useAuth } from '../context/AuthContext';
 import useInfiniteScroll from '../hooks/useInfiniteScroll';
+import { motion } from 'framer-motion';
 
 const FavoriteMovieCard = ({ movie }) => {
     const { isFavorite, toggleFavorite } = useUserActivity();
@@ -28,7 +29,12 @@ const FavoriteMovieCard = ({ movie }) => {
     };
 
     return (
-        <div onClick={handleCardClick} className="flex flex-col gap-2 group cursor-pointer w-full">
+        <motion.div
+            whileHover={{ scale: 1.05 }}
+            transition={{ duration: 0.3 }}
+            onClick={handleCardClick}
+            className="flex flex-col gap-2 group cursor-pointer w-full"
+        >
             {/* Poster Image Container */}
             <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-[#222]">
                 {movie.poster ? (
@@ -67,7 +73,7 @@ const FavoriteMovieCard = ({ movie }) => {
                     <span>{movie.year}</span>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
@@ -76,6 +82,7 @@ const TvShowPage = () => {
     const [genres, setGenres] = useState([]);
     const [selectedGenre, setSelectedGenre] = useState('');
     const [loading, setLoading] = useState(true);
+    const [initialLoading, setInitialLoading] = useState(true); // Added for header loading state
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
 
@@ -101,7 +108,10 @@ const TvShowPage = () => {
 
     useEffect(() => {
         const fetchShows = async () => {
-            if (page === 1) setLoading(true);
+            if (page === 1) {
+                setLoading(true);
+                setInitialLoading(true); // Set initial loading for the header
+            }
             try {
                 const response = await getDiscoverTvShows(page, selectedGenre);
                 const formattedShows = response.data.results.map(item => ({
@@ -123,6 +133,7 @@ const TvShowPage = () => {
                 console.error("Error fetching TV shows:", error);
             } finally {
                 setLoading(false);
+                if (page === 1) setInitialLoading(false); // Reset initial loading after first fetch
             }
         };
 
@@ -137,55 +148,79 @@ const TvShowPage = () => {
         setHasMore(true);
     };
 
-    const handleShuffle = () => {
-        if (shows.length > 0) {
-            const shuffled = [...shows].sort(() => Math.random() - 0.5);
-            setShows(shuffled);
-        }
-    };
+    // Shuffle functionality removed as per new header design
+    // const handleShuffle = () => {
+    //     if (shows.length > 0) {
+    //         const shuffled = [...shows].sort(() => Math.random() - 0.5);
+    //         setShows(shuffled);
+    //     }
+    // };
 
     return (
-        <div className="min-h-screen bg-[#110C0C] text-white pt-[100px] pb-24">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
+            className="min-h-screen bg-[#110C0C] text-white pt-32 pb-24"
+        >
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
 
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 mt-4">
-                    <div>
-                        <h1 className="text-4xl md:text-[44px] font-bold mb-3 tracking-tight text-white">
-                            TV Shows
-                        </h1>
-                        <p className="text-[#AAAAAA] text-[16px] font-medium max-w-lg leading-relaxed">
-                            Binge-worthy series and trending episodic content. {shows.length} shows loaded.
-                        </p>
-                    </div>
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-white/10 pb-8">
+                    <motion.div
+                        initial={{ x: -20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2 uppercase">TV Series</h1>
+                        <p className="text-gray-400 font-medium">Binge-worthy shows from around the world, all in one place.</p>
+                    </motion.div>
 
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={handleShuffle}
-                            className="flex items-center gap-2 bg-[#F40612] hover:bg-red-700 text-white px-6 py-2.5 rounded-[4px] font-bold transition-transform hover:scale-105 active:scale-95 text-sm cursor-pointer"
-                        >
-                            <Shuffle className="w-4 h-4" />
-                            Shuffle Collections
-                        </button>
-                    </div>
+                    <motion.div
+                        initial={{ x: 20, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-full cursor-default"
+                    >
+                        <div className="w-2 h-2 rounded-full bg-brand-red animate-pulse"></div>
+                        <span className="text-sm font-bold text-gray-300 uppercase tracking-wider">
+                            {initialLoading ? 'Loading Catalog...' : `${shows.length} SHOWS AVAILABLE`}
+                        </span>
+                    </motion.div>
                 </div>
 
-                {/* Genre Bar */}
-                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 -mx-6 px-6 lg:-mx-12 lg:px-12">
-                    <button
+                {/* Genre Filter */}
+                <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-6 -mx-6 px-6 lg:-mx-12 lg:px-12 mb-12">
+                    <motion.button
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => handleGenreSelect('')}
-                        className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === '' ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                        className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === ''
+                            ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
+                            : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
+                            }`}
                     >
                         All
-                    </button>
-                    {genres.map((genre) => (
-                        <button
+                    </motion.button>
+                    {genres.map((genre, index) => (
+                        <motion.button
                             key={genre.id}
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: 0.1 + (index + 1) * 0.05 }} // Adjusted delay for "All" button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
                             onClick={() => handleGenreSelect(genre.id)}
-                            className={`px-6 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id ? 'bg-white text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white border border-white/10'}`}
+                            className={`px-6 py-2.5 rounded-full text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedGenre === genre.id
+                                ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
+                                : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
+                                }`}
                         >
                             {genre.name}
-                        </button>
+                        </motion.button>
                     ))}
                 </div>
 
@@ -201,12 +236,17 @@ const TvShowPage = () => {
                     ))}
                 </div>
 
-                {/* Infinite Scroll trigger */}
-                {hasMore && (
-                    <div ref={loaderRef} className="w-full h-32 flex items-center justify-center mt-8">
-                        {loading && page > 1 && (
-                            <div className="w-8 h-8 border-4 border-[#F40612]/30 border-t-[#F40612] rounded-full animate-spin"></div>
-                        )}
+                {/* Loading State for "Load More" */}
+                {loading && page > 1 && (
+                    <div className="flex justify-center mt-12 py-10">
+                        <div className="w-10 h-10 border-4 border-brand-red/20 border-t-brand-red rounded-full animate-spin"></div>
+                    </div>
+                )}
+
+                {/* Infinite Scroll Trigger */}
+                {hasMore && !initialLoading && (
+                    <div ref={loaderRef} className="h-20 w-full flex items-center justify-center mt-4">
+                        {!loading && <div className="w-2 h-2 rounded-full bg-brand-red/40 animate-bounce"></div>}
                     </div>
                 )}
 
@@ -215,9 +255,8 @@ const TvShowPage = () => {
                         You've reached the end of the collection.
                     </div>
                 )}
-
             </div>
-        </div>
+        </motion.div>
     );
 };
 
