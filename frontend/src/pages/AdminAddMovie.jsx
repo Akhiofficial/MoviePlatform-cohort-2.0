@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { ChevronDown, Calendar } from 'lucide-react';
 import AdminSidebar from '../components/AdminSidebar';
 import AdminTopbar from '../components/AdminTopbar';
@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 
 const AdminAddMovie = () => {
     const navigate = useNavigate();
+    const dateInputRef = useRef(null);
     const [formData, setFormData] = useState({
         title: '',
         genre: '',
@@ -90,8 +91,19 @@ const AdminAddMovie = () => {
                                 <div className="space-y-2.5 relative">
                                     <label className="text-[12px] font-bold text-gray-200 ml-1">Release Date</label>
                                     <div className="relative group">
-                                        <input type="text" name="releaseDate" value={formData.releaseDate} onChange={handleInputChange} required placeholder="YYYY-MM-DD" className="w-full bg-[#1C1414]/80 border border-[#2A1E1E] focus:border-brand-red/40 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-hidden transition-colors text-[13px] font-medium" />
-                                        <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-500 group-focus-within:text-brand-red transition-colors pointer-events-none" />
+                                        <input
+                                            ref={dateInputRef}
+                                            type="date"
+                                            name="releaseDate"
+                                            value={formData.releaseDate}
+                                            onChange={handleInputChange}
+                                            required
+                                            className="w-full bg-[#1C1414]/80 border border-[#2A1E1E] focus:border-brand-red/40 rounded-xl px-4 py-3.5 text-white placeholder-gray-600 focus:outline-hidden transition-colors text-[13px] font-medium scheme-dark [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:right-0 [&::-webkit-calendar-picker-indicator]:w-10 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                                        />
+                                        <Calendar
+                                            onClick={() => dateInputRef.current?.showPicker()}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-gray-500 group-focus-within:text-brand-red transition-colors cursor-pointer pointer-events-auto"
+                                        />
                                     </div>
                                 </div>
                                 <div className="space-y-2.5">

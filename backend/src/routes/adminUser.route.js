@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUsers, deleteUser } = require('../controllers/adminUser.controller');
+const { getUsers, getStats, deleteUser } = require('../controllers/adminUser.controller');
 const { identifyUser, isAdmin } = require('../middleware/auth.middleware');
 
 const router = express.Router();
@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(identifyUser);
 router.use(isAdmin);
 
+router.get('/stats', getStats);
 router.get('/', getUsers);
 router.delete('/:id', deleteUser);
 
