@@ -36,7 +36,7 @@ const FavoriteMovieCard = ({ movie }) => {
             className="flex flex-col gap-2 group cursor-pointer w-full"
         >
             {/* Poster Image Container */}
-            <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-[#222]">
+            <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-gray-200 dark:bg-[#222]">
                 {movie.poster ? (
                     <img
                         src={movie.poster}
@@ -50,9 +50,9 @@ const FavoriteMovieCard = ({ movie }) => {
                 )}
 
                 {/* Rating Badge */}
-                <div className="absolute bottom-3 left-3 bg-[#1A1A1A] px-2 py-1 rounded-[6px] flex items-center gap-1.5 z-10">
+                <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-[#1A1A1A] px-2 py-1 rounded-[6px] flex items-center gap-1.5 z-10 border border-gray-200 dark:border-white/5">
                     <Star className="w-3.5 h-3.5 fill-[#F2B01E] text-[#F2B01E]" />
-                    <span className="text-white text-[13px] font-bold">{movie.rating}</span>
+                    <span className="text-gray-900 dark:text-white text-[13px] font-bold">{movie.rating}</span>
                 </div>
 
                 {/* Heart Icon */}
@@ -66,7 +66,7 @@ const FavoriteMovieCard = ({ movie }) => {
 
             {/* Details */}
             <div className="flex flex-col gap-0.5 px-0.5 mt-1">
-                <h3 className="text-white font-bold text-[16px] truncate">{movie.title}</h3>
+                <h3 className="text-gray-900 dark:text-white font-bold text-[16px] truncate">{movie.title}</h3>
                 <div className="flex items-center text-[13px] text-gray-400">
                     <span>{movie.genre}</span>
                     <span className="mx-1.5">•</span>
@@ -153,7 +153,7 @@ const MoviePage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="min-h-screen bg-[#110C0C] text-white pt-32 pb-24"
+            className="min-h-screen bg-white dark:bg-bg-dark text-gray-900 dark:text-white pt-32 pb-24 transition-colors duration-300"
         >
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
 
@@ -209,7 +209,7 @@ const MoviePage = () => {
                             onClick={() => handleGenreSelect(genre.id)}
                             className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all cursor-pointer ${selectedGenre === genre.id
                                 ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
-                                : 'bg-[#1A1A1A] text-gray-400 hover:bg-[#222] hover:text-white border border-white/5'
+                                : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-[#222] hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
                                 }`}
                         >
                             {genre.name}

@@ -1,9 +1,20 @@
 @import "tailwindcss";
+@config "../tailwind.config.js";
 
 @theme {
   --color-brand-red: #E50914;
-  --color-bg-dark: #0A0A0A;
-  --color-card-dark: #1F1F1F;
+  --color-bg-dark: #0f0f0f;
+  --color-card-dark: #1a1a1a;
+  --color-bg-light: #f8fafc;
+  /* gray-100 */
+  --color-card-light: #ffffff;
+}
+
+/* Global Transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
 }
 
 /* Hide scrollbar globally */
@@ -19,8 +30,14 @@
 }
 
 body {
-  background-color: var(--color-bg-dark);
-  color: white;
-  font-family: system-ui, -apple-system, sans-serif;
+  background-color: var(--color-bg-light);
+  color: #111827;
+  /* text-gray-900 */
+  font-family: sans-serif;
   overflow-x: hidden;
+}
+
+.dark body {
+  background-color: var(--color-bg-dark);
+  color: #ffffff;
 }

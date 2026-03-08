@@ -21,7 +21,7 @@ const HistoryCard = ({ movie }) => {
             onClick={() => navigate(`/movie/${movie.movieId}`)}
             className="flex flex-col gap-2 group cursor-pointer w-full"
         >
-            <div className="relative aspect-3/4 w-full rounded-[24px] overflow-hidden shadow-lg border border-white/5 transition-transform duration-300 group-hover:scale-[1.03] group-hover:shadow-2xl group-hover:border-white/20 bg-white/5">
+            <div className="relative aspect-3/4 w-full rounded-[24px] overflow-hidden shadow-lg border border-gray-200 dark:border-white/5 transition-transform duration-300 group-hover:scale-[1.03] group-hover:shadow-2xl group-hover:border-white/20 bg-gray-100 dark:bg-white/5">
                 <img
                     src={movie.poster || movie.backdrop}
                     alt={movie.title}
@@ -30,7 +30,7 @@ const HistoryCard = ({ movie }) => {
 
                 {/* Ultra Prominent Progress Bar (Netflix Style) */}
                 {movie.currentTime > 0 && (
-                    <div className="absolute bottom-2 left-2 right-2 h-2.5 bg-white/10 rounded-full overflow-hidden z-40 backdrop-blur-sm border border-white/5">
+                    <div className="absolute bottom-2 left-2 right-2 h-2.5 bg-gray-300 dark:bg-white/10 rounded-full overflow-hidden z-40 backdrop-blur-sm border border-gray-200 dark:border-white/5">
                         <div
                             className="h-full bg-brand-red shadow-[0_0_15px_rgba(229,9,20,1)] transition-all duration-500"
                             style={{ width: `${progressPercent}%` }}
@@ -45,7 +45,7 @@ const HistoryCard = ({ movie }) => {
                 </div>
             </div>
             <div className="flex flex-col gap-1 px-1 mt-1">
-                <h3 className="text-white font-bold text-[17px] leading-tight group-hover:text-brand-red transition-colors">{movie.title}</h3>
+                <h3 className="text-gray-900 dark:text-white font-bold text-[17px] leading-tight group-hover:text-brand-red transition-colors">{movie.title}</h3>
                 <div className="flex items-center text-[13px] text-gray-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">
                     <span>Watched Recently</span>
                 </div>
@@ -86,7 +86,7 @@ const History = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="min-h-screen bg-[#141010] text-white pt-32 pb-24"
+            className="min-h-screen bg-white dark:bg-[#141010] text-gray-900 dark:text-white pt-32 pb-24 transition-colors duration-300"
         >
             <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
                 <div className="text-brand-red text-xs font-bold tracking-widest mb-4 uppercase">
@@ -94,7 +94,7 @@ const History = () => {
                 </div>
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
                     <div>
-                        <h1 className="text-4xl md:text-[48px] font-bold mb-3 tracking-tight">
+                        <h1 className="text-4xl md:text-[48px] font-bold mb-3 tracking-tight text-gray-900 dark:text-white">
                             Watch History
                         </h1>
                         <p className="text-gray-400 text-[17px] font-medium max-w-lg leading-relaxed">
@@ -111,7 +111,7 @@ const History = () => {
                         </button>
                         <button
                             onClick={handleSort}
-                            className={`flex items-center justify-center w-12 h-12 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 transition-colors ${sortOrder !== 'none' ? 'text-brand-red border-brand-red/50' : 'text-white'}`}
+                            className={`flex items-center justify-center w-12 h-12 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 dark:hover:bg-white/10 rounded-xl border border-gray-200 dark:border-white/10 transition-colors ${sortOrder !== 'none' ? 'text-brand-red border-brand-red/50' : 'text-gray-900 dark:text-white'}`}
                             title={sortOrder === 'asc' ? 'Sort Z-A' : 'Sort A-Z'}
                         >
                             {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : sortOrder === 'desc' ? <SortDesc className="w-5 h-5" /> : <Filter className="w-5 h-5" />}
@@ -126,9 +126,9 @@ const History = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-white/5 rounded-3xl bg-white/5">
-                        <Clock className="w-16 h-16 text-gray-600 mb-6" />
-                        <h2 className="text-2xl font-bold text-white mb-2">No Watch History</h2>
+                    <div className="flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-gray-200 dark:border-white/5 rounded-3xl bg-gray-50 dark:bg-white/5">
+                        <Clock className="w-16 h-16 text-gray-400 dark:text-gray-600 mb-6" />
+                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No Watch History</h2>
                         <p className="text-gray-400 font-medium max-w-md mx-auto">
                             Explore the catalog and view movies. Your activity will magically appear right here!
                         </p>

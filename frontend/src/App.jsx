@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { ThemeProvider } from "./context/ThemeContext"
 import Navbar from "./components/Navbar"
 import Footer from "./components/Footer"
 import Home from "./pages/Home"
@@ -17,36 +18,39 @@ import History from "./pages/History"
 
 function App() {
   return (
-    <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-bg-dark font-inter">
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/admin/movies" element={<AdminManageMovies />} />
-          <Route path="/admin/add-movie" element={<AdminAddMovie />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route
-            path="*"
-            element={
-              <>
-                <Navbar />
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/movie/:id" element={<MovieDetails />} />
-                  <Route path="/search" element={<Search />} />
-                  <Route path="/favorites" element={<Favorites />} />
-                  <Route path="/history" element={<History />} />
-                  <Route path="/movies" element={<MoviePage />} />
-                  <Route path="/tv" element={<TvShowPage />} />
-                </Routes>
-                <Footer />
-              </>
-            }
-          />
-        </Routes>
-      </div>
-    </BrowserRouter>
+    <ThemeProvider>
+      <BrowserRouter>
+        <div className="flex flex-col min-h-screen bg-bg-light dark:bg-bg-dark text-gray-900 dark:text-white font-inter transition-colors duration-300">
+
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/movies" element={<AdminManageMovies />} />
+            <Route path="/admin/add-movie" element={<AdminAddMovie />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
+            <Route
+              path="*"
+              element={
+                <>
+                  <Navbar />
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/movie/:id" element={<MovieDetails />} />
+                    <Route path="/search" element={<Search />} />
+                    <Route path="/favorites" element={<Favorites />} />
+                    <Route path="/history" element={<History />} />
+                    <Route path="/movies" element={<MoviePage />} />
+                    <Route path="/tv" element={<TvShowPage />} />
+                  </Routes>
+                  <Footer />
+                </>
+              }
+            />
+          </Routes>
+        </div>
+      </BrowserRouter>
+    </ThemeProvider>
   )
 }
 

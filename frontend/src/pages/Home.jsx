@@ -52,7 +52,12 @@ const Home = () => {
                 const results = trendingRes.data.results;
 
                 if (results.length > 0) {
-                    const hero = results[0];
+                    // Filter movies with backdrops for a better hero experience
+                    const moviesWithBackdrops = results.filter(m => m.backdrop_path);
+                    const heroList = moviesWithBackdrops.length > 0 ? moviesWithBackdrops : results;
+                    const randomIdx = Math.floor(Math.random() * Math.min(heroList.length, 10));
+                    const hero = heroList[randomIdx];
+
                     setHeroMovie({
                         id: hero.id,
                         title: hero.title || hero.name,
@@ -159,7 +164,7 @@ const Home = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="min-h-screen bg-[#110C0C] text-white pb-20 overflow-hidden"
+            className="min-h-screen bg-bg-light dark:bg-bg-dark text-gray-900 dark:text-white pb-20 overflow-hidden transition-colors duration-300"
         >
             {initialLoading && !heroMovie && <HeroSkeleton />}
 
@@ -174,8 +179,8 @@ const Home = () => {
                             alt={heroMovie.title}
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-linear-to-r from-[#110C0C] via-[#110C0C]/80 to-transparent"></div>
-                        <div className="absolute inset-0 bg-linear-to-t from-[#110C0C] via-[#110C0C]/20 to-transparent"></div>
+                        <div className="absolute inset-0 bg-linear-to-r from-gray-50/90 dark:from-bg-dark via-gray-50/50 dark:via-bg-dark/80 to-transparent"></div>
+                        <div className="absolute inset-0 bg-linear-to-t from-gray-50 dark:from-bg-dark via-transparent to-transparent"></div>
                     </div>
 
                     <div className="relative h-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col justify-center pt-20 cursor-default">
@@ -187,21 +192,21 @@ const Home = () => {
                         >
                             <motion.div variants={itemVariants} className="flex items-center gap-3">
                                 <span className="bg-brand-red text-white text-xs font-bold px-3 py-1 rounded-[4px] bg-opacity-90">TRENDING #1</span>
-                                <span className="text-gray-300 font-medium text-sm drop-shadow-md">
+                                <span className="text-gray-600 dark:text-gray-300 font-medium text-sm drop-shadow-md">
                                     {heroMovie.media_type === 'tv' ? 'TV Series' : 'Movie'} • {heroMovie.year}
                                 </span>
                             </motion.div>
 
                             <motion.h1
                                 variants={itemVariants}
-                                className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-white drop-shadow-2xl uppercase"
+                                className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-gray-900 dark:text-white drop-shadow-2xl uppercase"
                             >
                                 {heroMovie.title}
                             </motion.h1>
 
                             <motion.p
                                 variants={itemVariants}
-                                className="text-lg md:text-xl text-gray-300 font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3"
+                                className="text-lg md:text-xl text-gray-700 dark:text-gray-300 font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3"
                             >
                                 {heroMovie.overview}
                             </motion.p>
@@ -211,7 +216,7 @@ const Home = () => {
                                     <Play className="w-5 h-5 fill-current" />
                                     Play Trailer
                                 </Link>
-                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/10 px-8 py-3.5 rounded-full font-bold transition-all cursor-pointer">
+                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-gray-900/10 dark:bg-white/10 hover:bg-gray-900/20 dark:hover:bg-white/20 backdrop-blur-md text-gray-900 dark:text-white border border-gray-900/10 dark:border-white/10 px-8 py-3.5 rounded-full font-bold transition-all cursor-pointer">
                                     <Info className="w-5 h-5" />
                                     More Info
                                 </Link>
@@ -233,7 +238,7 @@ const Home = () => {
                             variants={headingVariants}
                             className="flex items-center justify-between mb-2 mt-30"
                         >
-                            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
+                            <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <TrendingUp className="w-6 h-6 text-brand-red" />
                                 Our Latest Additions
                             </h2>
@@ -260,7 +265,7 @@ const Home = () => {
                         variants={headingVariants}
                         className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6" : "flex items-center justify-between mb-2 mt-30"}
                     >
-                        <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-white">
+                        <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                             <TrendingUp className="w-6 h-6 text-brand-red" />
                             Trending Now
                         </h2>
@@ -291,7 +296,7 @@ const Home = () => {
                         variants={headingVariants}
                         className="flex items-center justify-between mb-6"
                     >
-                        <h2 className="text-2xl md:text-3xl font-bold text-white">Popular Movies</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Popular Movies</h2>
                     </motion.div>
                     <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                         {initialLoading ? renderSkeletons() : popularMovies.map((movie, index) => (
@@ -316,7 +321,7 @@ const Home = () => {
                         variants={headingVariants}
                         className="flex items-center justify-between mb-6"
                     >
-                        <h2 className="text-2xl md:text-3xl font-bold text-white">Top Rated TV Shows</h2>
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Top Rated TV Shows</h2>
                     </motion.div>
                     <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x snap-mandatory">
                         {initialLoading ? renderSkeletons() : topRatedTvShows.map((show, index) => (

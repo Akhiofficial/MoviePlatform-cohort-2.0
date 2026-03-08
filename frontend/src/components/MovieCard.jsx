@@ -86,13 +86,14 @@ const MovieCard = ({ movie }) => {
 
                 {/* Details */}
                 <div className="flex flex-col gap-1 px-1">
-                    <h3 className="text-white font-bold text-lg truncate group-hover:text-brand-red transition-colors">{movie?.title || "Movie Title"}</h3>
-                    <div className="flex items-center justify-between text-sm text-gray-400 font-medium tracking-wide">
+                    <h3 className="text-gray-900 dark:text-white font-bold text-lg truncate group-hover:text-brand-red transition-colors">{movie?.title || "Movie Title"}</h3>
+                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 font-medium tracking-wide">
                         <span>{movie?.year || "2024"}</span>
-                        <span className="uppercase text-[10px] bg-white/10 px-2 py-0.5 rounded text-gray-300">{movie?.media_type || 'Movie'}</span>
+                        <span className="uppercase text-[10px] bg-gray-200 dark:bg-white/10 px-2 py-0.5 rounded text-gray-600 dark:text-gray-300 transition-colors">{movie?.media_type || 'Movie'}</span>
                     </div>
                 </div>
             </motion.div>
+
             <TrailerModal
                 isOpen={showTrailer}
                 onClose={() => setShowTrailer(false)}

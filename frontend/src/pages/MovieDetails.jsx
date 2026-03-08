@@ -178,7 +178,7 @@ const MovieDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#110C0C]">
+      <div className="min-h-screen bg-white dark:bg-bg-dark transition-colors duration-300">
         <HeroSkeleton />
       </div>
     );
@@ -186,7 +186,7 @@ const MovieDetails = () => {
 
   if (!movie) {
     return (
-      <div className="min-h-screen bg-[#110C0C] flex items-center justify-center text-white">
+      <div className="min-h-screen bg-white dark:bg-bg-dark flex items-center justify-center text-gray-900 dark:text-white transition-colors duration-300">
         <p>Movie not found.</p>
       </div>
     );
@@ -197,7 +197,7 @@ const MovieDetails = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-[#110C0C] text-white"
+      className="min-h-screen bg-white dark:bg-bg-dark text-gray-900 dark:text-white transition-colors duration-300"
     >
       {/* Hero Backdrop Setup */}
       <div className="relative w-full h-[60vh] md:h-[99vh]">
@@ -211,7 +211,7 @@ const MovieDetails = () => {
             className="w-full h-full object-cover"
             style={{ maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 100%)' }}
           />
-          <div className="absolute inset-0 bg-linear-to-t from-[#110C0C] via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-linear-to-t from-white dark:from-bg-dark via-transparent to-transparent"></div>
         </div>
 
         <div className="relative h-full max-w-[1440px] mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-end pb-12 gap-8 md:gap-12 pt-32 cursor-default">
@@ -335,7 +335,7 @@ const MovieDetails = () => {
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-1 h-6 bg-brand-red rounded-full"></div>
-              <h3 className="text-xl md:text-2xl font-bold">Synopsis</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Synopsis</h3>
             </div>
             <p className="text-gray-400 leading-relaxed text-base md:text-lg">
               {movie.synopsis}
@@ -344,19 +344,19 @@ const MovieDetails = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-1 h-6 bg-brand-red rounded-full"></div>
-              <h3 className="text-xl md:text-2xl font-bold">Info</h3>
+              <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white">Info</h3>
             </div>
             <div className="flex justify-between items-center py-2 border-b border-white/5">
               <span className="text-gray-500 font-medium text-sm">Director</span>
-              <span className="text-white font-semibold text-sm">{movie.director}</span>
+              <span className="text-gray-900 dark:text-white font-semibold text-sm">{movie.director}</span>
             </div>
-            <div className="flex justify-between items-center py-2 border-b border-white/5">
+            <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-white/5">
               <span className="text-gray-500 font-medium text-sm">Budget</span>
-              <span className="text-white font-semibold text-sm">{movie.budget}</span>
+              <span className="text-gray-900 dark:text-white font-semibold text-sm">{movie.budget}</span>
             </div>
             <div className="flex justify-between items-center py-2">
               <span className="text-gray-500 font-medium text-sm">Revenue</span>
-              <span className="text-white font-semibold text-sm">{movie.revenue}</span>
+              <span className="text-gray-900 dark:text-white font-semibold text-sm">{movie.revenue}</span>
             </div>
           </div>
         </div>
@@ -364,13 +364,13 @@ const MovieDetails = () => {
         {/* Main Cast */}
         {movie.cast && movie.cast.length > 0 && (
           <div className="space-y-6">
-            <h3 className="text-2xl font-bold">Main Cast</h3>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Main Cast</h3>
             <div className="flex gap-6 md:gap-10 overflow-x-auto pb-4 no-scrollbar">
               {movie.cast.map(person => (
                 <div key={person.id} className="flex flex-col items-center gap-3 min-w-[100px]">
                   <img src={person.image} alt={person.name} className="w-24 h-24 rounded-full object-cover border-2 border-brand-red/20 shadow-lg p-1" />
                   <div className="text-center">
-                    <h4 className="text-white font-bold text-sm leading-tight">{person.name}</h4>
+                    <h4 className="text-gray-900 dark:text-white font-bold text-sm leading-tight">{person.name}</h4>
                     <p className="text-gray-500 text-xs mt-1">{person.role}</p>
                   </div>
                 </div>
@@ -382,7 +382,7 @@ const MovieDetails = () => {
         {/* Video Spotlight */}
         {movie.trailerKey && (
           <div className="space-y-6" ref={spotlightRef}>
-            <h3 className="text-2xl font-bold">Video Spotlight</h3>
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Video Spotlight</h3>
             <div className="relative w-full aspect-video rounded-[24px] overflow-hidden group border border-white/10 shadow-2xl bg-black">
               {!isVideoPlaying ? (
                 <div
@@ -426,7 +426,7 @@ const MovieDetails = () => {
         {similarMovies.length > 0 && (
           <div className="space-y-6 pt-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold">You May Also Like</h3>
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">You May Also Like</h3>
             </div>
             <div className="flex gap-6 overflow-x-auto pb-8 pt-4 no-scrollbar -mx-6 px-6 lg:-mx-12 lg:px-12 snap-x">
               {similarMovies.map(movie => (

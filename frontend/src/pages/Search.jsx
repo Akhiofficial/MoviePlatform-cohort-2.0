@@ -54,7 +54,7 @@ const SearchResultCard = ({ item }) => {
       className={`flex flex-col gap-2 group w-full ${!isPerson ? 'cursor-pointer' : ''}`}
     >
       {/* Image Container */}
-      <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-[#222] shadow-lg border border-white/5 group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-300">
+      <div className="relative aspect-3/4 w-full rounded-[16px] overflow-hidden bg-gray-100 dark:bg-[#222] shadow-lg border border-gray-200 dark:border-white/5 group-hover:shadow-2xl group-hover:border-white/20 transition-all duration-300">
         {item.poster_path || item.profile_path ? (
           <motion.img
             initial={{ opacity: 0 }}
@@ -65,19 +65,19 @@ const SearchResultCard = ({ item }) => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-[#1A1A1A]">
+          <div className="w-full h-full flex flex-col items-center justify-center p-4 bg-gray-200 dark:bg-[#1A1A1A]">
             {isPerson ? (
               <User className="w-12 h-12 text-gray-500 mb-2 opacity-50" />
             ) : null}
-            <span className="text-white font-medium text-center opacity-80">{item.title || item.name}</span>
+            <span className="text-gray-900 dark:text-white font-medium text-center opacity-80">{item.title || item.name}</span>
           </div>
         )}
 
         {/* Rating Badge (Only for Movies/TV) */}
         {!isPerson && item.vote_average > 0 && (
-          <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-[6px] flex items-center gap-1.5 z-10 border border-white/10">
+          <div className="absolute bottom-3 left-3 bg-white/90 dark:bg-black/60 backdrop-blur-md px-2 py-1 rounded-[6px] flex items-center gap-1.5 z-10 border border-gray-200 dark:border-white/10">
             <Star className="w-3.5 h-3.5 fill-[#F2B01E] text-[#F2B01E]" />
-            <span className="text-white text-[13px] font-bold">{parseFloat((item.vote_average / 2).toFixed(1))}</span>
+            <span className="text-gray-900 dark:text-white text-[13px] font-bold">{parseFloat((item.vote_average / 2).toFixed(1))}</span>
           </div>
         )}
 
@@ -105,7 +105,7 @@ const SearchResultCard = ({ item }) => {
 
       {/* Details */}
       <div className="flex flex-col gap-0.5 px-0.5 mt-1">
-        <h3 className="text-white font-bold text-[16px] truncate group-hover:text-brand-red transition-colors">{item.title || item.name}</h3>
+        <h3 className="text-gray-900 dark:text-white font-bold text-[16px] truncate group-hover:text-brand-red transition-colors">{item.title || item.name}</h3>
         <div className="flex items-center text-[13px] text-gray-400 capitalize">
           <span>{item.media_type === 'tv' ? 'TV Series' : item.media_type}</span>
 
@@ -184,7 +184,7 @@ const Search = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-[#110C0C] text-white pt-32 pb-24"
+      className="min-h-screen bg-white dark:bg-bg-dark text-gray-900 dark:text-white pt-32 pb-24 transition-colors duration-300"
     >
       <div className="max-w-[1440px] mx-auto px-6 lg:px-12">
 
@@ -194,7 +194,7 @@ const Search = () => {
             initial={{ y: -20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-4xl md:text-[44px] font-bold mb-8 tracking-tight text-white"
+            className="text-4xl md:text-[44px] font-bold mb-8 tracking-tight text-gray-900 dark:text-white"
           >
             Find your next favorite story
           </motion.h1>
@@ -212,7 +212,7 @@ const Search = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search movies, tv shows, people..."
-              className="w-full bg-[#1A1A1A] hover:bg-[#222] transition-colors rounded-full py-4 pl-14 pr-12 text-lg text-white placeholder-gray-500 outline-none border border-white/10 focus:border-white/30 shadow-lg"
+              className="w-full bg-gray-100 dark:bg-[#1A1A1A] hover:bg-gray-200 dark:hover:bg-[#222] transition-colors rounded-full py-4 pl-14 pr-12 text-lg text-gray-900 dark:text-white placeholder-gray-500 outline-none border border-gray-200 dark:border-white/10 focus:border-brand-red/30 shadow-lg"
               autoFocus
             />
             {searchQuery && (
@@ -240,8 +240,8 @@ const Search = () => {
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveTab(tab)}
                 className={`px-6 py-2 rounded-full font-bold text-sm transition-all duration-200 cursor-pointer ${activeTab === tab
-                  ? 'bg-[#F40612] text-white shadow-lg shadow-[#F40612]/20'
-                  : 'bg-[#1A1A1A] text-gray-300 hover:bg-[#222] hover:text-white border border-white/5'
+                  ? 'bg-brand-red text-white shadow-lg shadow-brand-red/20'
+                  : 'bg-gray-100 dark:bg-[#1A1A1A] text-gray-500 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-[#222] hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-white/5'
                   }`}
               >
                 {tab}
