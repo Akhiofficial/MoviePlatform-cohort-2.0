@@ -44,13 +44,13 @@ const AdminAddMovie = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="flex bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+            className="flex flex-col md:flex-row bg-[#110C0C] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
         >
             <AdminSidebar />
             <main className="flex-1 flex flex-col h-screen overflow-y-auto w-full bg-[#110C0C]">
                 <AdminTopbar />
-                <div className="p-8 pb-20 max-w-[1200px] w-full mx-auto space-y-10">
-                    <section className="bg-[#1A1414] border border-[#2A1E1E] rounded-[24px] p-8 md:p-10 shadow-xl overflow-hidden relative">
+                <div className="p-4 md:p-8 pb-20 max-w-[1200px] w-full mx-auto space-y-10">
+                    <section className="bg-[#1A1414] border border-[#2A1E1E] rounded-[24px] p-6 md:p-10 shadow-xl overflow-hidden relative">
                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-brand-red/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
 
                         <div className="mb-8 relative z-10">

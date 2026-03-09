@@ -7,7 +7,7 @@ const AuthContext = createContext();
 
 // Configure default axios for our backend
 export const api = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: import.meta.env.MODE === 'development' ? 'http://localhost:3000/api' : '/api',
     withCredentials: true, // Needed to attach cookies
 });
 
@@ -54,8 +54,14 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const updateProfile = async (data) => {
+        const res = await api.put('/auth/profile', data);
+        setUser(res.data.user);
+        return res.data;
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, logout, updateProfile }}>
             {children}
         </AuthContext.Provider>
     );

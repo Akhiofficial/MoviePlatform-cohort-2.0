@@ -287,7 +287,7 @@ const MovieDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.5 }}
-              className="flex flex-col sm:flex-row items-center gap-4 pt-4"
+              className="flex flex-col sm:flex-row items-center gap-4 pt-4 pb-4 md:pb-0"
             >
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -324,8 +324,8 @@ const MovieDetails = () => {
         </div>
       </div>
 
-      {/* Poster on Mobile */}
-      <div className="px-6 -mt-32 mb-10 w-48 mx-auto shadow-2xl rounded-2xl overflow-hidden border-2 border-white/10 relative z-20 md:hidden aspect-2/3 bg-black">
+      {/* Poster on Mobile (Hidden on mobile per user request) */}
+      <div className="hidden px-6 -mt-32 mb-10 w-48 mx-auto shadow-2xl rounded-2xl overflow-hidden border-2 border-white/10 relative z-20 md:hidden aspect-2/3 bg-black">
         <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
       </div>
 

@@ -126,10 +126,54 @@ async function getMe(req, res) {
     })
 }
 
+async function updateProfile(req, res) {
+    const { fullname, currentPassword, newPassword } = req.body;
+
+    try {
+        // Find user and explicitly select password if we need to check it
+        const user = await userModel.findById(req.user.id).select('+password');
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // If they want to change the password, verify the current one
+        if (currentPassword && newPassword) {
+            const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+            if (!isPasswordValid) {
+                return res.status(400).json({ message: "Invalid current password" });
+            }
+
+            // Hash new password
+            user.password = await bcrypt.hash(newPassword, 10);
+        }
+
+        // Update fullname if provided
+        if (fullname) {
+            user.fullname = fullname;
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            message: "Profile updated successfully",
+            user: {
+                id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
 
 module.exports = {
     registerUser,
     loginUser,
     logoutUser,
-    getMe
+    getMe,
+    updateProfile
 };

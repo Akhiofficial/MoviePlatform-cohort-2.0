@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser, logoutUser, getMe } = require('../controllers/auth.controller');
+const { registerUser, loginUser, logoutUser, getMe, updateProfile } = require('../controllers/auth.controller');
 const { identifyUser } = require('../middleware/auth.middleware');
 
 const router = express.Router();
@@ -25,5 +25,10 @@ router.delete('/logout', identifyUser, logoutUser)
 // @route   GET /api/auth/me
 // @access  Private
 router.get('/me', identifyUser, getMe);
+
+// @desc    Update user profile
+// @route   PUT /api/auth/profile
+// @access  Private
+router.put('/profile', identifyUser, updateProfile);
 
 module.exports = router;

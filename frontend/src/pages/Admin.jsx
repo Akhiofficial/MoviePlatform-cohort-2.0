@@ -10,7 +10,7 @@ const Admin = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4 }}
-            className="flex bg-[#161111] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
+            className="flex flex-col md:flex-row bg-[#161111] min-h-screen text-white font-sans selection:bg-brand-red selection:text-white"
         >
             {/* Sidebar */}
             <AdminSidebar />

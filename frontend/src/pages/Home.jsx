@@ -199,25 +199,25 @@ const Home = () => {
 
                             <motion.h1
                                 variants={itemVariants}
-                                className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-gray-900 dark:text-white drop-shadow-2xl uppercase"
+                                className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter shadow-sm text-gray-900 dark:text-white drop-shadow-2xl uppercase"
                             >
                                 {heroMovie.title}
                             </motion.h1>
 
                             <motion.p
                                 variants={itemVariants}
-                                className="text-lg md:text-xl text-gray-700 dark:text-gray-300 font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3"
+                                className="text-base md:text-xl text-gray-700 dark:text-gray-300 font-normal md:font-medium leading-relaxed max-w-xl drop-shadow-lg line-clamp-3 md:line-clamp-4"
                             >
                                 {heroMovie.overview}
                             </motion.p>
 
-                            <motion.div variants={itemVariants} className="flex items-center gap-4 pt-4">
-                                <Link to={`/movie/${heroMovie.id}`} className="group/btn flex items-center gap-2 bg-brand-red hover:bg-[#F40612] text-white px-8 py-3.5 rounded-full font-bold transition-all shadow-[0_4px_14px_rgba(229,9,20,0.3)] cursor-pointer">
-                                    <Play className="w-5 h-5 fill-current" />
+                            <motion.div variants={itemVariants} className="flex items-center gap-3 sm:gap-4 pt-4 w-full sm:w-auto">
+                                <Link to={`/movie/${heroMovie.id}`} className="group/btn flex-1 sm:flex-none flex items-center justify-center gap-2 bg-brand-red hover:bg-[#F40612] text-white px-5 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold transition-all shadow-[0_4px_14px_rgba(229,9,20,0.3)] cursor-pointer whitespace-nowrap text-sm md:text-base">
+                                    <Play className="w-4 h-4 sm:w-5 sm:h-5 fill-current" />
                                     Play Trailer
                                 </Link>
-                                <Link to={`/movie/${heroMovie.id}`} className="flex items-center gap-2 bg-gray-900/10 dark:bg-white/10 hover:bg-gray-900/20 dark:hover:bg-white/20 backdrop-blur-md text-gray-900 dark:text-white border border-gray-900/10 dark:border-white/10 px-8 py-3.5 rounded-full font-bold transition-all cursor-pointer">
-                                    <Info className="w-5 h-5" />
+                                <Link to={`/movie/${heroMovie.id}`} className="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-gray-900/10 dark:bg-white/10 hover:bg-gray-900/20 dark:hover:bg-white/20 backdrop-blur-md text-gray-900 dark:text-white border border-gray-900/10 dark:border-white/10 px-5 sm:px-8 py-3 sm:py-3.5 rounded-full font-bold transition-all cursor-pointer whitespace-nowrap text-sm md:text-base">
+                                    <Info className="w-4 h-4 sm:w-5 sm:h-5" />
                                     More Info
                                 </Link>
                             </motion.div>
@@ -226,7 +226,7 @@ const Home = () => {
                 </div>
             )}
 
-            <div className="mx-auto px-6 lg:px-12 -mt-32 relative z-10 space-y-16">
+            <div className="mx-auto px-6 lg:px-12 -mt-24 md:-mt-32 relative z-10 space-y-12 md:space-y-16">
 
                 {/* Our Latest Additions (Admin Movies) */}
                 {ourMovies.length > 0 && (
@@ -236,7 +236,7 @@ const Home = () => {
                             whileInView="visible"
                             viewport={{ once: true, margin: "-100px" }}
                             variants={headingVariants}
-                            className="flex items-center justify-between mb-2 mt-30"
+                            className="flex items-center justify-between mb-2 mt-12 md:mt-20"
                         >
                             <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                                 <TrendingUp className="w-6 h-6 text-brand-red" />
@@ -263,7 +263,7 @@ const Home = () => {
                         whileInView="visible"
                         viewport={{ once: true, margin: "-100px" }}
                         variants={headingVariants}
-                        className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6" : "flex items-center justify-between mb-2 mt-30"}
+                        className={ourMovies.length > 0 ? "flex items-center justify-between mb-2 mt-6 md:mt-10" : "flex items-center justify-between mb-2 mt-12 md:mt-20"}
                     >
                         <h2 className="text-2xl md:text-3xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
                             <TrendingUp className="w-6 h-6 text-brand-red" />

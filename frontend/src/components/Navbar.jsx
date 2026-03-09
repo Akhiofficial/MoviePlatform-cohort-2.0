@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Clapperboard, Search, LogOut, User, ShieldCheck, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { Heart, Clock as History } from 'lucide-react';
 
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -81,24 +82,30 @@ const Navbar = () => {
 
                         {user ? (
                             <div className="flex items-center gap-4">
-                                <div className="hidden sm:flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                                <Link to="/favorites" className="md:hidden p-2 rounded-full bg-gray-100 dark:bg-white/10 text-brand-red hover:bg-gray-200 dark:hover:bg-white/20 transition-colors" aria-label="My List">
+                                    <Heart className="w-5 h-5 fill-current" />
+                                </Link>
+                                <Link to="/history" className="md:hidden p-2 rounded-full bg-gray-100 dark:bg-white/10 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-white/20 transition-colors" aria-label="History">
+                                    <History className="w-5 h-5" />
+                                </Link>
+                                <Link to="/profile" className="hidden sm:flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-brand-red dark:hover:text-brand-red transition-colors">
                                     <User className="w-4 h-4" />
                                     <span>{user.fullname || user.name || 'User'}</span>
-                                </div>
+                                </Link>
                                 {user.role === 'admin' && location.pathname === '/' && (
                                     <Link
                                         to="/admin"
-                                        className="flex items-center gap-1.5 bg-brand-red/20 hover:bg-brand-red/30 text-brand-red px-4 py-2 rounded-full transition-colors border border-brand-red/30 font-bold shadow-[0_0_10px_rgba(229,9,20,0.1)]"
+                                        className="flex items-center justify-center gap-1.5 bg-brand-red/20 hover:bg-brand-red/30 text-brand-red w-10 h-10 md:w-auto md:h-auto md:px-4 md:py-2 rounded-full transition-colors border border-brand-red/30 font-bold shadow-[0_0_10px_rgba(229,9,20,0.1)]"
                                     >
-                                        <ShieldCheck className="w-4 h-4" />
+                                        <ShieldCheck className="w-5 h-5 md:w-4 md:h-4" />
                                         <span className="hidden md:inline text-xs">Admin Panel</span>
                                     </Link>
                                 )}
                                 <button
                                     onClick={handleLogout}
-                                    className="flex items-center gap-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-white px-4 py-2 rounded-full transition-colors border border-gray-200 dark:border-white/10"
+                                    className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-white w-10 h-10 sm:w-auto sm:h-auto sm:px-4 sm:py-2 rounded-full transition-colors border border-gray-200 dark:border-white/10"
                                 >
-                                    <LogOut className="w-4 h-4" />
+                                    <LogOut className="w-5 h-5 sm:w-4 sm:h-4" />
                                     <span className="hidden sm:inline">Logout</span>
                                 </button>
                             </div>
